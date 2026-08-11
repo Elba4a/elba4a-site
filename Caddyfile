@@ -13,7 +13,11 @@
 	# Assets are cache-busted with ?v=N (see README), so they can live forever.
 	@assets path /assets/*
 	header @assets Cache-Control "public, max-age=31536000, immutable"
-	header *.html Cache-Control "public, max-age=300"
+
+	# Everything else is a page. Matching on `*.html` would miss both real
+	# URLs — `/` and `/en/` are served from index.html but don't end in it.
+	@pages not path /assets/*
+	header @pages Cache-Control "public, max-age=300"
 
 	header {
 		X-Content-Type-Options nosniff
