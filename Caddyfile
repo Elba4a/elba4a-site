@@ -22,6 +22,17 @@
 	header {
 		X-Content-Type-Options nosniff
 		Referrer-Policy strict-origin-when-cross-origin
+
+		# Railway already 301s http -> https, but that costs a plaintext round
+		# trip on every first visit and leaves a cached http entry showing
+		# "Not Secure". HSTS makes the browser rewrite http to https itself,
+		# before it touches the network.
+		#
+		# No `includeSubDomains`: it would force https on email.elba4a.com and
+		# ledge.elba4a.com, which are not ours to break. No `preload` either —
+		# that is effectively one-way.
+		Strict-Transport-Security "max-age=31536000"
+
 		-Server
 	}
 }
