@@ -66,6 +66,22 @@ surface here is dark. Re-measure before changing any of them.
 **Assets are cached forever.** `Caddyfile` sends `immutable` for
 `/assets/*`, so any edited asset needs its `?v=N` bumped in both HTML files.
 
+**The social cards are generated, not drawn.** `tools/og-{ar,en}.html` are the
+source; the PNGs are screenshots of them. After editing either one:
+
+```bash
+CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+for L in ar en; do
+  "$CHROME" --headless --disable-gpu --hide-scrollbars --force-device-scale-factor=1 \
+    --virtual-time-budget=3000 --window-size=1200,630 \
+    --screenshot="assets/img/og-$L.png" "file://$PWD/tools/og-$L.html"
+done
+```
+
+`og:image` is an absolute `https://elba4a.com/...` URL because scrapers do not
+resolve relative paths — so the card only renders once the domain is live, not
+from the `*.up.railway.app` URL.
+
 **The Dockerfile copies explicit paths, never `COPY .`** — that is what keeps
 `Dockerfile`, `README.md` and dotfiles out of the public web root. Keep it that
 way when adding files.

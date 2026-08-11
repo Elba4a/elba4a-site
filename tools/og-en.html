@@ -1,0 +1,67 @@
+<!doctype html>
+<!-- Source for assets/img/og-en.png. Not shipped — the Dockerfile copies
+     explicit paths and tools/ is not one of them. Regenerate with the command
+     in README.md after changing anything here. -->
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1200px; height: 630px; }
+  body {
+    background: #0A0A0B;
+    color: #EDEDEF;
+    font-family: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    padding: 76px 84px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* Same offset light source as the page hero, mirrored for LTR. */
+  body::before {
+    content: "";
+    position: absolute;
+    top: -22%; left: 0;
+    width: 620px; height: 620px;
+    background: radial-gradient(circle, rgba(197,182,151,.11) 0%, transparent 65%);
+  }
+  .top, .btm { position: relative; }
+  .eyebrow {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+    font-size: 18px; letter-spacing: .18em; text-transform: uppercase; color: #8A8A93;
+  }
+  h1 {
+    font-size: 88px;
+    font-weight: 300;
+    line-height: 1.06;
+    color: #E8E2D6;
+    margin-top: 34px;
+    max-width: 15ch;
+  }
+  h1 em { font-style: normal; color: #C5B697; }
+  .rule { height: 1px; background: #1E1E22; margin-bottom: 26px; }
+  .btm { display: flex; justify-content: space-between; align-items: baseline; gap: 24px; }
+  .dom { font-size: 25px; color: #C5B697; }
+  .stack {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+    font-size: 17px; color: #8A8A93;
+  }
+</style>
+</head>
+<body>
+  <div class="top">
+    <p class="eyebrow">Islam Soliman · Software engineer · Cairo</p>
+    <h1>I build <em>Arabic-first</em> products, end to end.</h1>
+  </div>
+  <div>
+    <div class="rule"></div>
+    <div class="btm">
+      <span class="dom">elba4a.com</span>
+      <span class="stack">React Native · Next.js · Supabase · Claude API</span>
+    </div>
+  </div>
+</body>
+</html>
