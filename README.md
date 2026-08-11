@@ -59,15 +59,32 @@ surface here is dark. Re-measure before changing any of them.
 **Assets are cached forever.** `Caddyfile` sends `immutable` for
 `/assets/*`, so any edited asset needs its `?v=N` bumped in both HTML files.
 
-**The social card is generated, not drawn.** `tools/og.html` is the source;
-`assets/img/og.png` is a screenshot of it. After editing it:
+**The social card and the icons are generated, not drawn.** `tools/og.html` and
+`tools/icon.html` are the sources; the PNGs are screenshots of them. After
+editing either:
 
 ```bash
 CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 "$CHROME" --headless --disable-gpu --hide-scrollbars --force-device-scale-factor=1 \
   --virtual-time-budget=3000 --window-size=1200,630 \
   --screenshot="assets/img/og.png" "file://$PWD/tools/og.html"
+
+"$CHROME" --headless --disable-gpu --hide-scrollbars --force-device-scale-factor=1 \
+  --virtual-time-budget=2000 --window-size=180,180 \
+  --screenshot="assets/img/icon-180.png" "file://$PWD/tools/icon.html"
+sips -s format png --resampleWidth 32 assets/img/icon-180.png --out assets/img/icon-32.png
 ```
+
+`tools/icon.html` holds a **copy** of the favicon artwork, not an `<img>` of
+it — a `viewBox`-only SVG has no intrinsic size, so it renders at the browser
+default instead of filling the frame. If you change `favicon.svg`, change the
+copy too.
+
+**The icon ships three ways**: SVG for browsers that take it, a 32px PNG for
+those that don't, and a 180px `apple-touch-icon` for iOS home screens. The SVG
+alone was not enough — and because `/assets/*` is served `immutable` for a
+year, a favicon that has already been cached wrong only refreshes when its
+`?v=N` changes.
 
 `og:image` is an absolute `https://elba4a.com/...` URL because scrapers do not
 resolve relative paths — so the card only renders once the domain is live, not
