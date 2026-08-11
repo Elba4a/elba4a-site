@@ -1,15 +1,14 @@
 # elba4a.com
 
-Portfolio landing page for Islam Soliman. Arabic first (`/`, `dir="rtl"`),
-English at `/en/`.
+Portfolio landing page for Islam Soliman. One page, English.
 
 **No build step. No dependencies. No external fonts. One CSS file. No JavaScript.**
 
 ```
-index.html            Arabic  · dir="rtl" · the default
-en/index.html         English · dir="ltr"
+index.html            the page
 assets/css/site.css   the whole stylesheet
-assets/img/           six screenshots + an SVG favicon
+assets/img/           three screenshots, a social card, an SVG favicon
+tools/og.html         source for the social card (not shipped)
 Caddyfile             static file server, Railway's $PORT
 Dockerfile            caddy:2-alpine, explicit COPY per path
 ```
@@ -28,17 +27,11 @@ docker build -t elba4a-site . && docker run --rm -p 8080:80 -e PORT=80 elba4a-si
 
 ## Things worth knowing before editing
 
-**One stylesheet serves both directions.** Every box uses CSS logical
-properties (`margin-inline`, `inset-inline-start`, `border-block-end`), so RTL
-falls out of the same rules rather than needing a mirrored sheet. The two
-exceptions are `transform-origin`, which has no logical keywords, and the card
-arrow — both are handled with an explicit `[dir="rtl"]` rule right below the
-base rule.
-
-**Arabic display type needs `letter-spacing: 0` and looser leading.** Negative
-tracking breaks the cursive joins, and tight leading makes the dots hanging
-under one line collide with the line above. `--lh-display` is `1.06` for Latin
-and `1.34` under `:lang(ar)`.
+**Boxes use CSS logical properties** (`margin-inline`, `inset-inline-start`,
+`border-block-end`) even though the page is LTR-only. They cost nothing and
+mean a right-to-left version would not need a mirrored stylesheet. The one
+thing that would still need a hand-written override is `transform-origin`,
+which has no logical keywords.
 
 **`overflow-x` on `html` is `clip`, never `hidden`.** `hidden` forces
 `overflow-y` to compute to `auto`, which turns the element into a scroll
@@ -66,16 +59,14 @@ surface here is dark. Re-measure before changing any of them.
 **Assets are cached forever.** `Caddyfile` sends `immutable` for
 `/assets/*`, so any edited asset needs its `?v=N` bumped in both HTML files.
 
-**The social cards are generated, not drawn.** `tools/og-{ar,en}.html` are the
-source; the PNGs are screenshots of them. After editing either one:
+**The social card is generated, not drawn.** `tools/og.html` is the source;
+`assets/img/og.png` is a screenshot of it. After editing it:
 
 ```bash
 CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-for L in ar en; do
-  "$CHROME" --headless --disable-gpu --hide-scrollbars --force-device-scale-factor=1 \
-    --virtual-time-budget=3000 --window-size=1200,630 \
-    --screenshot="assets/img/og-$L.png" "file://$PWD/tools/og-$L.html"
-done
+"$CHROME" --headless --disable-gpu --hide-scrollbars --force-device-scale-factor=1 \
+  --virtual-time-budget=3000 --window-size=1200,630 \
+  --screenshot="assets/img/og.png" "file://$PWD/tools/og.html"
 ```
 
 `og:image` is an absolute `https://elba4a.com/...` URL because scrapers do not
@@ -94,14 +85,10 @@ way when adding files.
   a password page, so it gets no link.
 - Horus Transfer's repo is private and the site is not deployed. No link.
 - The commit count is written `800+` on purpose. The exact number moved twice
-  in one day; a precise figure in static HTML goes stale within a week.
-
-```bash
-cd /Users/fox/Code && total=0
-for d in Horus Muhrah-brand-hq NOOR hekta; do
-  total=$((total + $(git -C "$d" rev-list --count HEAD)))
-done; echo "$total"
-```
+  in one day; a precise figure in static HTML goes stale within a week. The
+  command that re-measures it lives in the private portfolio dossier, along
+  with the list of repos it counts — client repo names do not belong in a
+  public README.
 
 ## Deploy
 

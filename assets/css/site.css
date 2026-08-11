@@ -1,7 +1,7 @@
-/* elba4a.com — one stylesheet, no build step, no dependencies, no external fonts.
-   The Arabic and English pages share this file. Every box uses CSS logical
-   properties, so RTL and LTR both fall out of the same rules rather than
-   needing a mirrored stylesheet. */
+/* elba4a.com — one stylesheet, no build step, no dependencies, no external
+   fonts, no JavaScript. Boxes use CSS logical properties throughout; the page
+   is LTR-only today, but the properties cost nothing and mean a second
+   direction would not need a mirrored stylesheet. */
 
 /* ---------------------------------------------------------------- tokens */
 
@@ -22,8 +22,8 @@
 
   /* Named families are hints only — there is no @font-face and no network
      request. Whatever the OS already has wins. */
-  --font-body:    "IBM Plex Sans Arabic", "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", "Noto Sans Arabic", sans-serif;
-  --font-display: "Reem Kufi", "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body:    "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono:    ui-monospace, SFMono-Regular, "SF Mono", "IBM Plex Mono", Menlo, monospace;
 
   --shell: 1180px;
@@ -36,7 +36,6 @@
   --fs-body:    clamp(1rem, 1.05vw, 1.0625rem);
   --fs-meta:    .6875rem;
 
-  /* Latin display can sit tight. Arabic cannot — see the :lang(ar) block. */
   --lh-display: 1.06;
 
   --ease: cubic-bezier(.22, 1, .36, 1);
@@ -68,18 +67,6 @@ body {
   background: var(--ink);
   -webkit-font-smoothing: antialiased;
 }
-
-/* Arabic display type: letter-spacing must stay 0 — negative tracking breaks
-   the cursive joins — and the leading has to stay loose enough that the dots
-   and hamzas hanging under one line don't collide with the line above it.
-   1.06 is fine for Latin and unreadable in Arabic. */
-:lang(ar) {
-  --fs-display: clamp(2.5rem, 7.5vw, 5.5rem);
-  --lh-display: 1.34;
-  letter-spacing: 0;
-}
-:lang(ar) h1, :lang(ar) h2, :lang(ar) h3 { letter-spacing: 0; }
-:lang(ar) h2, :lang(ar) h3 { line-height: 1.4; }
 
 h1, h2, h3 { margin: 0; font-weight: 500; text-wrap: balance; }
 p { margin: 0; text-wrap: pretty; }
@@ -114,10 +101,6 @@ a { color: inherit; text-decoration: none; }
 }
 .skip:focus { inset-block-start: .75rem; }
 
-/* Latin runs inside Arabic paragraphs get isolated so the bidi algorithm
-   can't drag their trailing punctuation to the wrong side. */
-code, .chip, .ltr { unicode-bidi: isolate; }
-
 code {
   font-family: var(--font-mono);
   font-size: .875em;
@@ -133,12 +116,6 @@ code {
   text-transform: uppercase;
   color: var(--muted);
   margin: 0;
-}
-:lang(ar) .eyebrow {
-  font-family: var(--font-body);
-  letter-spacing: 0;
-  text-transform: none;
-  font-size: .8125rem;
 }
 
 .rule {
@@ -178,18 +155,6 @@ code {
 }
 .hdr__link:hover { color: var(--text); }
 
-.lang {
-  font-family: var(--font-mono);
-  font-size: var(--fs-meta);
-  letter-spacing: .12em;
-  padding: .35rem .7rem;
-  border: 1px solid var(--line-lit);
-  border-radius: 999px;
-  color: var(--bone);
-  transition: border-color .2s var(--ease), color .2s var(--ease);
-}
-.lang:hover { border-color: var(--accent); color: var(--accent); }
-
 /* ------------------------------------------------------------------ hero */
 
 .hero {
@@ -197,8 +162,7 @@ code {
   padding-block: clamp(4rem, 14vh, 9rem) clamp(3rem, 8vh, 5rem);
 }
 
-/* One soft light source, offset to the inline-start edge. It flips with
-   direction because it is positioned with a logical property. */
+/* One soft light source, offset to the inline-start edge. */
 .hero::before {
   content: "";
   position: absolute;
@@ -239,12 +203,10 @@ code {
   font-size: clamp(1rem, 1.4vw, 1.1875rem);
 }
 
-/* transform-origin has no logical keywords, so the side is set per direction. */
 .hero__rule {
   margin-block: clamp(3rem, 7vh, 4.5rem) 0;
   transform-origin: left center;
 }
-[dir="rtl"] .hero__rule { transform-origin: right center; }
 
 /* Entrance motion is opt-IN, never opt-out. The default state above is fully
    visible, so anything that stops the animation from running — a reduced-motion
@@ -369,7 +331,6 @@ a.card:hover { border-color: var(--line-lit); background: #131316; }
   white-space: nowrap;
 }
 .card__tag--lit { color: var(--accent); }
-:lang(ar) .card__tag { font-family: var(--font-body); letter-spacing: 0; font-size: .75rem; }
 
 .card p { color: var(--muted); font-size: .9375rem; }
 
@@ -382,7 +343,6 @@ a.card:hover { border-color: var(--line-lit); background: #131316; }
   border-block-start: 1px solid var(--line);
   margin-block-start: auto;
 }
-:lang(ar) .card__meta { font-family: var(--font-body); font-size: .8125rem; }
 
 .chips { display: flex; flex-wrap: wrap; gap: .375rem; }
 .chip {
@@ -400,11 +360,7 @@ a.card:hover { border-color: var(--line-lit); background: #131316; }
   color: var(--accent);
 }
 /* Arrow points along the reading direction in both scripts. */
-.card__go::after {
-  content: " \2192";
-  display: inline-block;
-}
-[dir="rtl"] .card__go::after { transform: scaleX(-1); }
+.card__go::after { content: " \2192"; }
 
 /* Hekta card: copy on one side, the phones on the other. */
 .showcase {
@@ -480,12 +436,6 @@ a.card:hover { border-color: var(--line-lit); background: #131316; }
   color: var(--muted);
   padding-block-start: .35rem;
 }
-:lang(ar) .stack__k {
-  font-family: var(--font-body);
-  letter-spacing: 0;
-  text-transform: none;
-  font-size: .875rem;
-}
 
 /* --------------------------------------------------------------- contact */
 
@@ -545,7 +495,6 @@ a.card:hover { border-color: var(--line-lit); background: #131316; }
   font-family: var(--font-mono);
   font-size: var(--fs-meta);
 }
-:lang(ar) .ftr__note { font-family: var(--font-body); font-size: .75rem; }
 
 /* -------------------------------------------------- scroll-driven motion */
 
@@ -577,7 +526,6 @@ a.card:hover { border-color: var(--line-lit); background: #131316; }
     animation-range: entry 20% cover 40%;
     transform-origin: left center;
   }
-  [dir="rtl"] .section__head .rule { transform-origin: right center; }
 
   /* The phones drift at slightly different rates across the whole scroll
      past the card — parallax without a scroll listener. */
@@ -606,15 +554,6 @@ a.card:hover { border-color: var(--line-lit); background: #131316; }
   to   { transform: translateY(calc(var(--drift, 0px) * -1)); }
 }
 
-/* Cross-document view transition on the language switch. Chrome and Safari
-   animate it; everything else just navigates. Zero JavaScript either way. */
-@view-transition { navigation: auto; }
-
-::view-transition-old(root) { animation: vt-out .28s var(--ease) both; }
-::view-transition-new(root) { animation: vt-in  .34s var(--ease) both; }
-@keyframes vt-out { to { opacity: 0; } }
-@keyframes vt-in  { from { opacity: 0; } }
-
 /* ------------------------------------------------------------ responsive */
 
 @media (max-width: 900px) {
@@ -626,8 +565,9 @@ a.card:hover { border-color: var(--line-lit); background: #131316; }
 @media (max-width: 620px) {
   .card, .card--wide, .card--third { grid-column: span 6; }
   .hero h1 { max-inline-size: none; }
-  .hdr__nav { gap: .875rem; }
-  .hdr__link { display: none; }
+  /* Four links do not fit next to the name at this width, and the page is one
+     scroll — the header keeps the name and drops the jump links. */
+  .hdr__nav { display: none; }
 }
 
 /* --------------------------------------------------------- reduced motion */
@@ -641,5 +581,4 @@ a.card:hover { border-color: var(--line-lit); background: #131316; }
 
   *, *::before, *::after { transition-duration: .001ms !important; }
 
-  @view-transition { navigation: none; }
 }
