@@ -83,7 +83,7 @@
   /* `?v=` on the dynamic import too. /assets/* is served `immutable`, so
      without one an edited world.js would be served from cache forever to
      everyone who had already loaded the page. */
-  import('./world.js?v=6')
+  import('./world.js?v=10')
     .then(({ createWorld }) => {
       const world = createWorld(canvas);
       /* Announce only once the matcap has landed. The class makes the canvas

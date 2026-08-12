@@ -120,7 +120,7 @@ try {
   }
 
   /* ---- source invariants ------------------------------------------------ */
-  const raw = await (await fetch(`${BASE}/assets/js/world.js?v=6`)).text();
+  const raw = await (await fetch(`${BASE}/assets/js/world.js?v=10`)).text();
   /* Strip comments: the file documents the bugs it fixed by quoting them, and
      a checker that cannot tell code from prose reports the documentation. */
   const src = raw.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
@@ -134,7 +134,7 @@ try {
   /* Same comment-stripping discipline as the JS: this stylesheet explains the
      rules it deleted by naming them, and a checker that reads prose as code
      reports the documentation as the defect. */
-  const cssRaw = await (await fetch(`${BASE}/assets/css/site.css?v=10`)).text();
+  const cssRaw = await (await fetch(`${BASE}/assets/css/site.css?v=11`)).text();
   const css = cssRaw.replace(/\/\*[\s\S]*?\*\//g, '');
   ok(!/backdrop-filter/.test(css), 'no backdrop-filter anywhere in the stylesheet');
   const hasWorldRules = css.split('\n').filter((l) => l.includes('.has-world') && !l.includes('#world'));

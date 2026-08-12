@@ -893,6 +893,73 @@ code {
   }
 }
 
+/* ------------------------------------------------------------ the band */
+
+/* Same construction as the hero: the dark ground is a z-index -2
+   pseudo-element so the canvas can paint between it and the text. Never a
+   background on the section itself. */
+.band { position: relative; color: var(--on-stage); }
+.band::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background: var(--stage);
+}
+
+/* A tall track with a pinned inner. Scroll through the track scrubs the part;
+   the cost is bounded at 1.2 extra viewports and nothing is scroll-jacked —
+   the page keeps moving at exactly the speed the reader is scrolling it. */
+.track { block-size: 220svb; }
+.track__pin {
+  position: sticky;
+  inset-block-start: 0;
+  block-size: 100svb;
+  display: grid;
+  align-items: center;
+}
+.track__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  align-items: center;
+  inline-size: 100%;
+}
+
+.layers { display: grid; gap: clamp(.875rem, 2.2vh, 1.5rem); }
+.layer {
+  display: grid;
+  gap: .3rem;
+  padding-inline-start: 1rem;
+  border-inline-start: 2px solid rgb(255 255 255 / .14);
+  transition: color .45s var(--ease), border-color .45s var(--ease);
+}
+.layer__k {
+  font-family: var(--mono);
+  font-size: var(--fs-meta);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+.layer__v { font-size: clamp(1rem, 1.3vw, 1.125rem); }
+
+/* Motion is opt-IN. With no scene, every row sits at full strength and the
+   band reads as a plain list. `data-scrub` is added by world.js only once it
+   is actually driving the part, and only then does anything dim. */
+.band[data-scrub] .layer { color: var(--on-stage-2); }
+.band[data-scrub] .layer.is-on {
+  color: var(--on-stage);
+  border-inline-start-color: var(--stage-accent);
+}
+
+@media (max-width: 860px) {
+  /* The part first, then the list under it — the same order as the hero, so
+     the page has one rhythm rather than two. */
+  .track__grid { grid-template-columns: 1fr; gap: clamp(1.25rem, 4vh, 2rem); }
+  .layers { order: 2; }
+  .track__grid .stage { order: 1; aspect-ratio: 4 / 3; }
+  .track { block-size: 200svb; }
+}
+
 /* ---------------------------------------------------------------- gallery */
 
 /* Five real screens. The horizontal scroll is deliberate: it keeps the product

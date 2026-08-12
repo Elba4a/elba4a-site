@@ -10,8 +10,8 @@
 <link rel="icon" href="/assets/img/icon-32.png?v=3" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/assets/img/icon-180.png?v=3">
 <link rel="preload" href="/assets/fonts/schibsted-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/css/site.css?v=10">
-<script src="/assets/js/site.js?v=8" defer></script>
+<link rel="stylesheet" href="/assets/css/site.css?v=11">
+<script src="/assets/js/site.js?v=12" defer></script>
 <meta property="og:type" content="website">
 <meta property="og:locale" content="en_US">
 <meta property="og:title" content="Islam Soliman — Software Engineer">
@@ -287,6 +287,45 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           </p>
           <span class="oss__m">MIT · 12 tests · zero dependencies</span>
         </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ----------------------------------------------------------- layers -->
+  <!-- The part comes apart. Each row names a layer, and the plate carrying it
+       lights as you reach it. Row and plate are tied by colour and timing, not
+       by pixel position, so nothing can drift out of register at an odd
+       viewport. With the scene absent every row simply reads at full strength:
+       the finished state is the default, and the scrub only dims what is not
+       current. -->
+  <section class="band" id="layers">
+    <div class="track">
+      <div class="track__pin">
+        <div class="shell track__grid">
+          <ol class="layers">
+            <li class="layer">
+              <span class="layer__k">App</span>
+              <span class="layer__v">Expo SDK 56 · React Native · TypeScript strict</span>
+            </li>
+            <li class="layer">
+              <span class="layer__k">Web</span>
+              <span class="layer__v">Next.js App Router · static HTML and CSS</span>
+            </li>
+            <li class="layer">
+              <span class="layer__k">Edge</span>
+              <span class="layer__v">14 Edge Functions on Deno · every sensitive call</span>
+            </li>
+            <li class="layer">
+              <span class="layer__k">Data</span>
+              <span class="layer__v">33 Postgres tables · 83 migrations · RLS on every one</span>
+            </li>
+            <li class="layer">
+              <span class="layer__k">Infra</span>
+              <span class="layer__v">Docker · Caddy · Railway · Cloudflare</span>
+            </li>
+          </ol>
+          <div class="stage" data-pose="band" aria-hidden="true"></div>
+        </div>
       </div>
     </div>
   </section>

@@ -166,6 +166,25 @@ there are fourteen Edge Functions; thirty-three because there are thirty-three P
 tables. If those figures change in the work they change in `world.js`, or the part is
 lying about the thing it depicts.
 
+**The band's rows and plates are tied by colour and timing, never by pixel position.** As
+the scroll crosses each fifth of the track, one row lights and that plate swaps to the
+gold matcap. Nothing projects a 3D position into screen space to line up with a label, so
+nothing can drift out of register at an unexpected viewport. With the scene absent every
+row simply reads at full strength — the finished state is the default, and the scrub only
+dims what is not current.
+
+**The band frames its camera for the OPEN gap the whole way through.** Refitting to the
+live bounding sphere pulls the camera back at exactly the rate the plates separate, so the
+spread cancels itself out and the part appears to sit still. Hold the frame and it grows
+into its cell instead.
+
+**The band rotates toward the viewer's left as it opens, not away.** The stack runs along
+local Z and the camera sits mostly along +X, so at the hero's 28° the stack axis is only
+~36° off the view axis and the plates queue up behind one another. Turning down to about
+-5° puts it ~67° off — near-maximum lateral separation with the drilled faces still turned
+toward you. A full -30° is geometrically perpendicular and useless: plate edges, no
+evidence.
+
 **The scene never holds content.** Every word, number and link lives in the DOM. `world.js`
 renders geometry and textures only. This is what makes the fallback a complete page rather
 than a stub, and it is why the canvas carries `aria-hidden`.
