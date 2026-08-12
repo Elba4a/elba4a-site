@@ -2,15 +2,18 @@
 
 Portfolio landing page for Islam Soliman. One page, English.
 
-**No build step. No dependencies. One CSS file.** Two self-hosted fonts and one small
-vanilla JavaScript file, so nothing is ever fetched from another origin.
+**No build step. One CSS file.** Two self-hosted fonts, two small scripts of our own, and
+one vendored dependency: Three.js, which drives the 3D layer. Nothing is ever fetched from
+another origin — the library is committed here, not pulled from a CDN.
 
 ```
 index.html            the page
 assets/css/site.css   the whole stylesheet
-assets/js/site.js     the only script: the language wipe and a scrollspy
+assets/js/site.js     scrollspy, and the gate that decides whether the 3D loads at all
+assets/js/world.js    the scene: procedural layers, scroll-driven camera
+assets/js/vendor/     Three.js r0.185.1, MIT, vendored (two ESM files)
 assets/fonts/         two variable .woff2 subsets, self-hosted
-assets/img/           app screenshots, the Muhrah emblem, a social card, an SVG favicon
+assets/img/           five app screens, the Muhrah emblem, a social card, an SVG favicon
 tools/og.html         source for the social card (not shipped)
 Caddyfile             static file server, Railway's $PORT
 Dockerfile            caddy:2-alpine, explicit COPY per path
@@ -58,15 +61,23 @@ the start state back out to the base rule.
 the owner of the section rule; the rule is drawn on an `::after` with `transform` alone for
 exactly this reason. An earlier version animated both and the headings rendered half-faded.
 
-**The language wipe degrades to a static split.** Its control is a real
-`<input type="range">`, so keyboard, touch and assistive tech work before any script runs.
-`site.js` only mirrors the value onto `--pos`. With JavaScript blocked the stage keeps the
-`52%` written in the stylesheet, which still shows both language builds at once — the point
-of the figure survives. Keep it that way.
+**The 3D layer is optional, and the gate runs before the import.** `site.js` checks for
+reduced motion, a data-saving preference, and a real WebGL context *before* it dynamically
+imports `world.js`. A client that fails any check never requests Three.js at all — verified,
+not assumed: with `--disable-gpu` the server log shows the page and `site.js` fetched and
+`world.js` and `three.*` never requested. Keep every new check on that side of the import.
+
+**The scene never holds content.** Every word, number and link lives in the DOM. `world.js`
+renders geometry and textures only. This is what makes the fallback a complete page rather
+than a stub, and it is why the canvas carries `aria-hidden`.
 
 **All other motion is CSS.** Scroll reveals use `animation-timeline: view()`. There is no
 animation library and no IntersectionObserver driving visibility; the observer in
-`site.js` only marks the current nav link.
+`site.js` only marks the current nav link. GSAP is deliberately absent.
+
+**Every count in the scene is a real number.** Fourteen edge nodes, thirty-three data slabs.
+If those figures change in the work, change them in `world.js` too, or the geometry starts
+lying.
 
 **Colours are measured, not chosen.** Against `--paper` (`#FBFBF9`): `--ink` 17.4:1 ·
 `--accent` 7.5:1 · `--ink-2` 6.6:1. On `--paper-2` the muted text still measures 6.1:1.
@@ -125,6 +136,10 @@ These mirror the private portfolio dossier. If one changes there, change it here
   with the list of repos it counts — client repo names do not belong in a public README.
 - Keep the em-dash count low. The prose was rewritten specifically to stop reading as
   machine-generated, and em-dash saturation was the measurable half of that.
+- **The positioning is "one engineer builds every layer", not "Arabic-first".** That framing
+  was removed on 2026-08-12 at Islam's request: it read as regional-specialist and worked
+  against the international remote audience. Arabic survives only as a fact about the
+  languages he works in, never as the thesis. Do not reintroduce it as a headline.
 
 ## Deploy
 

@@ -88,7 +88,7 @@ body {
 
 h1, h2, h3 { margin: 0; font-weight: 500; text-wrap: balance; letter-spacing: -.02em; }
 p { margin: 0; text-wrap: pretty; }
-ul { margin: 0; padding: 0; list-style: none; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
 dl, dd, dt { margin: 0; }
 
 /* height:auto is load-bearing — the width/height attributes are there to
@@ -397,112 +397,6 @@ code {
   background: var(--paper);
 }
 
-/* -------------------------------------------------- the language wipe */
-
-.wipe {
-  margin: 0 0 clamp(2rem, 5vh, 3rem);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.25rem;
-}
-
-.wipe__stage {
-  --pos: 52%;
-  position: relative;
-  inline-size: min(330px, 78vw);
-  border-radius: 22px;
-  overflow: hidden;
-  background: var(--paper-3);
-  border: 1px solid var(--line-2);
-  box-shadow: 0 1px 2px rgb(0 0 0 / .04), 0 18px 40px -20px rgb(0 0 0 / .22);
-  touch-action: pan-y;
-}
-.wipe__base { inline-size: 100%; }
-.wipe__over {
-  position: absolute;
-  inset: 0;
-  /* Arabic occupies the inline-start side, English the rest. */
-  clip-path: inset(0 calc(100% - var(--pos)) 0 0);
-}
-.wipe__over img { inline-size: 100%; }
-
-.wipe__seam {
-  position: absolute;
-  inset-block: 0;
-  inset-inline-start: var(--pos);
-  inline-size: 2px;
-  background: var(--paper);
-  transform: translateX(-1px);
-  pointer-events: none;
-  box-shadow: 0 0 0 1px rgb(0 0 0 / .08);
-}
-.wipe__seam i {
-  position: absolute;
-  inset-block-start: 50%;
-  inset-inline-start: 50%;
-  translate: -50% -50%;
-  inline-size: 34px;
-  block-size: 34px;
-  border-radius: 999px;
-  background: var(--paper);
-  box-shadow: 0 2px 10px rgb(0 0 0 / .18);
-}
-.wipe__seam i::before,
-.wipe__seam i::after {
-  content: "";
-  position: absolute;
-  inset-block-start: 50%;
-  inline-size: 5px;
-  block-size: 5px;
-  border-block-start: 1.5px solid var(--ink);
-  border-inline-start: 1.5px solid var(--ink);
-}
-.wipe__seam i::before { inset-inline-start: 9px; translate: 0 -50%; rotate: -45deg; }
-.wipe__seam i::after  { inset-inline-end: 9px; translate: 0 -50%; rotate: 135deg; }
-
-.wipe__badge {
-  position: absolute;
-  inset-block-start: 12px;
-  font-family: var(--mono);
-  font-size: .625rem;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  padding: .25rem .5rem;
-  border-radius: 5px;
-  background: color-mix(in srgb, var(--ink) 78%, transparent);
-  color: var(--paper);
-  pointer-events: none;
-}
-.wipe__badge--l { inset-inline-start: 12px; }
-.wipe__badge--r { inset-inline-end: 12px; }
-
-/* The control is a real range input: keyboard, touch and screen reader all
-   come free, and with no JavaScript it still holds a readable 52/48 split. */
-.wipe__ctl {
-  position: absolute;
-  inset: 0;
-  inline-size: 100%;
-  block-size: 100%;
-  margin: 0;
-  opacity: 0;
-  cursor: ew-resize;
-  -webkit-appearance: none;
-  appearance: none;
-  background: transparent;
-}
-.wipe__ctl::-webkit-slider-thumb { -webkit-appearance: none; inline-size: 44px; block-size: 100%; }
-.wipe__ctl::-moz-range-thumb { inline-size: 44px; block-size: 100%; border: 0; opacity: 0; }
-.wipe__ctl:focus-visible { outline-offset: -3px; }
-
-.wipe figcaption {
-  font-size: .9375rem;
-  color: var(--ink-2);
-  max-inline-size: 54ch;
-  text-align: center;
-  text-wrap: pretty;
-}
-
 /* --------------------------------------------------------------- figures */
 
 /* Numbers sit on the thing they measure, never in a decorative grid. */
@@ -745,13 +639,6 @@ code {
     animation-range: entry 10% cover 34%;
   }
 
-  /* The phone lifts slightly across the whole scroll past its card —
-     parallax without a scroll listener. */
-  .wipe__stage {
-    animation: lift linear both;
-    animation-timeline: view();
-    animation-range: cover;
-  }
  }
 }
 
@@ -762,10 +649,6 @@ code {
 @keyframes draw {
   from { transform: scaleX(0); }
   to   { transform: scaleX(1); }
-}
-@keyframes lift {
-  from { transform: translateY(14px); }
-  to   { transform: translateY(-14px); }
 }
 
 /* ------------------------------------------------------------ responsive */
@@ -793,4 +676,124 @@ code {
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition-duration: .001ms !important; }
+}
+
+/* ------------------------------------------------------------- the world */
+
+/* The canvas is a backdrop, never a container. Every word on this page lives
+   in the DOM above it, so a client that never gets a WebGL context loses the
+   scene and nothing else. It stays `display:none` until site.js has confirmed
+   the client can actually render it and adds `.has-world`. */
+
+#world {
+  display: none;
+  position: fixed;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+.has-world #world { display: block; }
+
+/* Only lift the content out of the stacking context when there is something
+   behind it to lift away from. */
+.has-world body > :not(#world) { position: relative; z-index: 1; }
+.has-world body { background: transparent; }
+
+/* Text over a moving scene needs its own ground or it becomes unreadable the
+   moment a bright instance drifts underneath. Sections keep a near-opaque
+   paper panel; the scene reads through the hero and between the bands. */
+.has-world .section,
+.has-world .ftr {
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter: blur(14px) saturate(1.2);
+}
+.has-world .proj--alt {
+  background: color-mix(in srgb, var(--paper-2) 90%, transparent);
+}
+.has-world .hero { background: none; }
+
+/* ---------------------------------------------------------------- gallery */
+
+/* Five real screens. The horizontal scroll is deliberate: it keeps the product
+   at a readable size instead of shrinking five phones into thumbnails. */
+.gallery {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: min(190px, 46vw);
+  gap: clamp(.75rem, 1.6vw, 1.25rem);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  padding-block-end: 1rem;
+  margin-block-end: clamp(1.5rem, 4vh, 2.5rem);
+  scrollbar-width: thin;
+}
+.gallery figure { margin: 0; scroll-snap-align: start; }
+.gallery img {
+  inline-size: 100%;
+  border-radius: 16px;
+  border: 1px solid var(--line-2);
+  background: var(--paper-3);
+  box-shadow: 0 1px 2px rgb(0 0 0 / .04), 0 14px 32px -18px rgb(0 0 0 / .2);
+}
+.gallery figcaption {
+  margin-block-start: .625rem;
+  font-family: var(--mono);
+  font-size: var(--fs-meta);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+/* ----------------------------------------------------------------- ledger */
+
+/* Horus has no screenshots and no link, so what it shows is the parts list. */
+.ledger {
+  display: grid;
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  counter-reset: layer;
+}
+.ledger li {
+  background: var(--paper);
+  display: grid;
+  grid-template-columns: minmax(84px, 110px) 1fr;
+  gap: 1rem;
+  align-items: baseline;
+  padding: .875rem 1.125rem;
+}
+.proj--alt .ledger li { background: var(--paper-2); }
+.ledger__k {
+  font-family: var(--mono);
+  font-size: var(--fs-meta);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.ledger__v { font-size: .9375rem; }
+
+@media (max-width: 620px) {
+  .ledger li { grid-template-columns: 1fr; gap: .2rem; }
+}
+
+/* A soft paper scrim under the reading column. The scene is deliberately kept
+   out of the centre, but a bright instance can still drift close enough to
+   fight the headline, and the headline has to win every time. */
+.has-world .hero { position: relative; }
+.has-world .hero::before {
+  content: "";
+  position: absolute;
+  inset: -6% -10%;
+  z-index: -1;
+  background: radial-gradient(
+    62% 58% at 32% 50%,
+    color-mix(in srgb, var(--paper) 94%, transparent) 0%,
+    color-mix(in srgb, var(--paper) 78%, transparent) 45%,
+    transparent 78%);
+  pointer-events: none;
 }

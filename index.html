@@ -4,45 +4,48 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Islam Soliman — Software Engineer</title>
-<meta name="description" content="Islam Soliman builds Arabic-first products in Cairo. Mobile apps, web apps, and the Postgres underneath. React Native, Next.js, Supabase, Claude API.">
+<meta name="description" content="Islam Soliman builds whole products alone: the app, the web front end, the Postgres schema, the Edge Functions, and the container they ship in. React Native, Next.js, Supabase, Claude API.">
 <link rel="canonical" href="https://elba4a.com/">
 <link rel="icon" href="/assets/img/favicon.svg?v=3" type="image/svg+xml">
 <link rel="icon" href="/assets/img/icon-32.png?v=3" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/assets/img/icon-180.png?v=3">
 <link rel="preload" href="/assets/fonts/schibsted-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/css/site.css?v=2">
-<script src="/assets/js/site.js?v=1" defer></script>
+<link rel="stylesheet" href="/assets/css/site.css?v=3">
+<script src="/assets/js/site.js?v=2" defer></script>
 <meta property="og:type" content="website">
 <meta property="og:locale" content="en_US">
 <meta property="og:title" content="Islam Soliman — Software Engineer">
-<meta property="og:description" content="I build Arabic-first products in Cairo. Mobile apps, web apps, and the Postgres underneath.">
+<meta property="og:description" content="I build whole products alone: the app, the web front end, the schema, the Edge Functions, and the container they ship in.">
 <meta property="og:url" content="https://elba4a.com/">
 <meta property="og:site_name" content="elba4a.com">
-<meta property="og:image" content="https://elba4a.com/assets/img/og.png?v=2">
+<meta property="og:image" content="https://elba4a.com/assets/img/og.png?v=3">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Islam Soliman — I build the Arabic version first.">
+<meta property="og:image:alt" content="Islam Soliman — I build every layer.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#FBFBF9">
 </head>
 <body>
 <!--
-THESIS: One engineer who builds the Arabic version first, proved by showing the same
-app screen in both directions rather than claiming it. Refuses the near-black,
-one-gold-accent, hairline-bento portfolio the category ships by default.
-OWN-WORLD: Warm paper ground, near-black ink, one deep blue. Schibsted Grotesk with
-Azeret Mono carrying every figure. Rules and generous space instead of card chrome.
-STORY: This person builds whole products alone for a market he lives in; three of them
-cannot be linked, so the openable ones are handed over early and the rest are dimensioned.
-FIRST VIEWPORT: Eyebrow, six-word headline, one line of scope, then four links that open
-right now. Contact sits in the header from the first pixel.
-FORM: Category convention at full fidelity, chosen by the user over a dealt direction;
-candidate 7 declined; seed key 8ac4c70e.
+THESIS: One engineer builds every layer of a product, so the page is the stack
+itself, fallen through. Refuses both the flat card portfolio and the floating-island
+3D world every WebGL portfolio ships.
+OWN-WORLD: Paper ground, near-black ink, one deep blue. Schibsted Grotesk with Azeret
+Mono on every figure. A procedural WebGL stack behind live DOM content, never inside it.
+STORY: This person builds the app, the web, the schema, the functions and the
+infrastructure alone; three of four products cannot be linked, so the openable ones
+come first and the rest are counted.
+FIRST VIEWPORT: Eyebrow, headline, one line of scope, four links that open right now,
+with the device layer of the world drifting behind. Contact sits in the header.
+FORM: Full 3D world, chosen by the user over a contained accent, wow prioritised over
+scan speed; the static page remains complete for every client that cannot render it.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->
 
 <a class="skip" href="#main">Skip to content</a>
+
+<canvas id="world" aria-hidden="true"></canvas>
 
 <header class="hdr">
   <div class="shell hdr__in">
@@ -66,15 +69,16 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
   <!-- ------------------------------------------------------------- hero -->
   <section class="hero">
     <div class="shell">
-      <p class="eyebrow reveal">Software engineer · Cairo · Remote</p>
+      <p class="eyebrow">Software engineer · Cairo · Remote</p>
 
       <h1 class="hero__h">
-        <span class="line"><span>I build the</span></span>
-        <span class="line"><span>Arabic version <em>first</em>.</span></span>
+        <span class="line"><span>I build every</span></span>
+        <span class="line"><span>layer <em>myself</em>.</span></span>
       </h1>
 
       <p class="hero__sub">
-        Mobile apps, web apps, and the Postgres underneath. I write the Arabic myself.
+        The app, the web front end, the schema, the functions that run on the edge, and the
+        container the whole thing ships in. Four products, no team.
       </p>
 
       <div class="open">
@@ -106,40 +110,26 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           <span class="tag tag--live">Pre-submission · v1.0.0</span>
         </div>
         <p class="proj__lede">
-          Hekta is a money app for Egypt and the Gulf. You write what you spent in ordinary
-          Arabic, or photograph the receipt, and it fills in the form. Nothing saves until you
-          confirm it. It counts gold by gram and karat, the way gold is actually bought here.
+          A money app for Egypt and the Gulf. You write what you spent in plain language, or
+          photograph the receipt, and it fills in the form. Nothing saves until you confirm it.
+          It counts gold by gram and karat, which is how gold is actually bought there and what
+          no off-the-shelf library does.
         </p>
       </div>
 
-      <figure class="wipe reveal" data-wipe>
-        <div class="wipe__stage">
-          <img class="wipe__base" src="/assets/img/hekta-home-en.jpg?v=1" width="660" height="1434"
-               loading="lazy" decoding="async"
-               alt="Hekta home screen in English, showing the total balance, budget health, and an instalment due in four days.">
-          <div class="wipe__over" aria-hidden="true">
-            <img src="/assets/img/hekta-home-ar.jpg?v=1" width="660" height="1434" loading="lazy" decoding="async" alt="">
-          </div>
-          <span class="wipe__seam" aria-hidden="true"><i></i></span>
-          <span class="wipe__badge wipe__badge--l" aria-hidden="true">العربية</span>
-          <span class="wipe__badge wipe__badge--r" aria-hidden="true">English</span>
-          <input class="wipe__ctl" type="range" min="0" max="100" value="52" step="0.1"
-                 aria-label="Wipe between the Arabic and English build of the Hekta home screen">
-        </div>
-        <figcaption>
-          The same screen, same build. Drag it. The layout mirrors, the chevrons turn around,
-          the progress bars fill from the other side, and the currency lands where an Arabic
-          reader expects it.
-        </figcaption>
-      </figure>
+      <div class="gallery reveal">
+        <figure><img src="/assets/img/hekta-home.jpg?v=1" width="620" height="1347" loading="lazy" decoding="async" alt="Hekta home screen: total balance, budget health, and an instalment due in four days."><figcaption>Home</figcaption></figure>
+        <figure><img src="/assets/img/hekta-assistant.jpg?v=1" width="620" height="1347" loading="lazy" decoding="async" alt="The assistant turns a typed sentence into a proposed transaction card with amount, account, category and merchant, waiting on Apply."><figcaption>Assistant</figcaption></figure>
+        <figure><img src="/assets/img/hekta-networth.jpg?v=1" width="620" height="1347" loading="lazy" decoding="async" alt="Net worth, including gold held as an asset measured in grams and karats."><figcaption>Net worth</figcaption></figure>
+        <figure><img src="/assets/img/hekta-capture.jpg?v=1" width="620" height="1347" loading="lazy" decoding="async" alt="Receipt capture, reading a photographed receipt into a transaction."><figcaption>Capture</figcaption></figure>
+        <figure><img src="/assets/img/hekta-analytics.jpg?v=1" width="620" height="1347" loading="lazy" decoding="async" alt="Spending analytics broken down by category over time."><figcaption>Analytics</figcaption></figure>
+      </div>
 
       <div class="proj__grid">
         <dl class="facts reveal">
           <div><dt>Postgres tables</dt><dd>33 <span>RLS on every one</span></dd></div>
           <div><dt>Edge Functions</dt><dd>14 <span>every sensitive call</span></dd></div>
           <div><dt>Migrations</dt><dd>83 <span>hand-written, reversible</span></dd></div>
-          <!-- No thousands comma: the mono gives the comma a full character cell,
-               which reads as "1 , 700+" at display size. -->
           <div><dt>Tests</dt><dd>1700+ <span>client and edge, green</span></dd></div>
         </dl>
 
@@ -149,8 +139,8 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
             <li>Supabase</li><li>PostgreSQL</li><li>Deno</li><li>Claude API</li>
           </ul>
           <p class="proj__meta">
-            Three products in one app: daily tracking, net worth including karat-aware gold,
-            and shared expenses. Speech and receipt capture both feed the same confirm step.
+            Three products in one app: daily tracking, net worth, and shared expenses. Speech
+            and receipt capture both feed the same confirm step.
           </p>
           <p class="proj__link">
             <a href="https://legal.hekta.money" rel="noopener">Privacy and terms, live<span class="go"></span></a>
@@ -163,14 +153,13 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
     <article class="proj proj--alt shell">
       <div class="proj__head reveal">
         <div class="proj__title">
-          <h3>Muhrah <span class="proj__ar" lang="ar" dir="rtl">مُهرة</span></h3>
+          <h3>Muhrah</h3>
           <span class="tag">A brand I own</span>
         </div>
         <p class="proj__lede">
           A handmade bukhoor brand in Madinaty. I built the storefront, the design system, and
-          a WhatsApp bot that answers customers in Egyptian Arabic and closes the order inside
-          Shopify. The whole project carries one external dependency. Everything else is the
-          Node standard library.
+          a WhatsApp bot that answers customers and closes the order inside Shopify. The whole
+          project carries one external dependency. Everything else is the Node standard library.
         </p>
       </div>
 
@@ -215,18 +204,17 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
       </div>
 
       <div class="proj__grid">
-        <div class="locales reveal" aria-label="Locales the product ships in">
-          <span lang="ar" dir="rtl">العربية</span><span>English</span><span>Deutsch</span>
-          <span>Français</span><span>Italiano</span><span>Español</span>
-          <span>Español&nbsp;(LatAm)</span><span>Nederlands</span><span>Polski</span>
-          <span lang="ru">Русский</span><span lang="uk">Українська</span>
-          <span lang="cs">Čeština</span><span>Dansk</span>
-        </div>
+        <ol class="ledger reveal" aria-label="What I built on this one">
+          <li><span class="ledger__k">Front end</span><span class="ledger__v">Next.js App Router, server components</span></li>
+          <li><span class="ledger__k">Data</span><span class="ledger__v">PostgreSQL, a fare matrix from the operator's own prices</span></li>
+          <li><span class="ledger__k">Abuse</span><span class="ledger__v">Cloudflare Turnstile on every booking</span></li>
+          <li><span class="ledger__k">Delivery</span><span class="ledger__v">Telegram notifications to the operator</span></li>
+          <li><span class="ledger__k">Ship</span><span class="ledger__v">Docker image, one command</span></li>
+        </ol>
 
         <div class="proj__side reveal">
           <ul class="chips" aria-label="Stack">
-            <li>Next.js App Router</li><li>next-intl</li><li>PostgreSQL</li>
-            <li>Turnstile</li><li>Docker</li>
+            <li>Next.js App Router</li><li>PostgreSQL</li><li>Turnstile</li><li>Docker</li>
           </ul>
           <p class="proj__meta">
             Search only ever offers a destination the operator has actually priced, so no
@@ -245,9 +233,9 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           <span class="tag tag--live">Live</span>
         </div>
         <p class="proj__lede">
-          A landing page for an Egyptian finishing contractor. Arabic is the default direction
-          and English lives under a subpath. The building in the hero is drawn rather than
-          photographed, a gold wireframe that assembles itself line by line.
+          A landing page for an Egyptian finishing contractor. The building in the hero is drawn
+          rather than photographed, a gold wireframe that assembles itself line by line. Four
+          moments of motion in the whole page, counted and budgeted.
         </p>
       </div>
 
@@ -261,8 +249,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
             <li>Static HTML</li><li>CSS</li><li>Caddy</li><li>Docker</li><li>Railway</li>
           </ul>
           <p class="proj__meta">
-            Four moments of motion in the whole page, counted and budgeted. Static files on
-            Caddy with no backend behind them.
+            Static files on Caddy with no backend behind them, deploying on every push.
           </p>
         </div>
       </div>
@@ -282,9 +269,9 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
         <a class="oss__c reveal" href="https://github.com/Elba4a/arabic-type-rn" rel="noopener">
           <h3>arabic-type-rn<span class="go"></span></h3>
           <p>
-            Arabic text styling for React Native. Fonts load by PostScript name per weight, and
-            <code>letterSpacing</code> is zeroed, because negative tracking breaks the joins
-            between letters.
+            Type styling for React Native where fonts must load by PostScript name per weight
+            and <code>letterSpacing</code> has to be zeroed, because negative tracking breaks
+            the joins between letters.
           </p>
           <span class="oss__m">MIT · 12 tests · zero dependencies</span>
         </a>
@@ -347,8 +334,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
         <div class="stack__r reveal">
           <div class="stack__k">Web</div>
           <ul class="chips">
-            <li>Next.js App Router</li><li>next-intl</li><li>React</li>
-            <li>Static HTML and CSS</li>
+            <li>Next.js App Router</li><li>React</li><li>Static HTML and CSS</li><li>WebGL</li>
           </ul>
         </div>
         <div class="stack__r reveal">

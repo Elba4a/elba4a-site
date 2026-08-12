@@ -1,53 +1,13 @@
-/* elba4a.com — the only JavaScript on the page. No framework, no dependency.
-   Everything here is an enhancement: the page is complete and readable with
-   this file blocked, which is why nothing below creates content or hides it. */
+/* elba4a.com — page script. No framework, no dependency of its own.
+ *
+ * Everything here is an enhancement. The page is complete and readable with
+ * this file blocked, which is why nothing below creates content or hides it. */
 
 (() => {
   'use strict';
 
-  /* ---------------------------------------------------- the language wipe */
-
-  /* The control is a native <input type="range">, so keyboard, touch, and
-     assistive tech already work before this runs. All this does is mirror the
-     value onto a custom property. With the file blocked the stage keeps the
-     52% written in the stylesheet, which still shows both builds at once. */
-  for (const fig of document.querySelectorAll('[data-wipe]')) {
-    const stage = fig.querySelector('.wipe__stage');
-    const ctl = fig.querySelector('.wipe__ctl');
-    if (!stage || !ctl) continue;
-
-    const paint = () => stage.style.setProperty('--pos', ctl.value + '%');
-    ctl.addEventListener('input', paint);
-    paint();
-
-    /* Dragging anywhere on the image feels like the seam is the handle.
-       Pointer capture keeps the drag alive when the cursor leaves the frame. */
-    stage.addEventListener('pointerdown', (e) => {
-      if (e.pointerType === 'mouse' && e.button !== 0) return;
-      const track = (ev) => {
-        const box = stage.getBoundingClientRect();
-        const pct = ((ev.clientX - box.left) / box.width) * 100;
-        ctl.value = String(Math.min(100, Math.max(0, pct)));
-        paint();
-      };
-      stage.setPointerCapture(e.pointerId);
-      track(e);
-      const move = (ev) => track(ev);
-      const up = () => {
-        stage.removeEventListener('pointermove', move);
-        stage.removeEventListener('pointerup', up);
-        stage.removeEventListener('pointercancel', up);
-      };
-      stage.addEventListener('pointermove', move);
-      stage.addEventListener('pointerup', up);
-      stage.addEventListener('pointercancel', up);
-    });
-  }
-
   /* ------------------------------------------------------------ scrollspy */
 
-  /* Marks the header link for the section currently in view. Purely a hint;
-     the links work as plain anchors regardless. */
   const links = [...document.querySelectorAll('.hdr__nav a[href^="#"]')];
   const sections = links
     .map((a) => document.querySelector(a.getAttribute('href')))
@@ -66,10 +26,53 @@
           current = next;
         }
       },
-      /* Trip the moment a section reaches the upper third, so the mark
-         changes when the reader arrives rather than when they leave. */
+      /* Trip when a section reaches the upper third, so the mark changes when
+         the reader arrives rather than when they leave. */
       { rootMargin: '-25% 0px -70% 0px' }
     );
     for (const section of sections) spy.observe(section);
   }
+
+  /* --------------------------------------------------------------- the 3D */
+
+  /* The scene is 183KB gzipped of Three.js plus five textures. That is a real
+     cost, so it is only paid by a client that can actually use it. Every check
+     below runs BEFORE the dynamic import, never after: a client that fails one
+     never requests the library at all. */
+
+  const canvas = document.getElementById('world');
+  if (!canvas) return;
+
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced) return;
+
+  /* Respect an explicit data-saving preference. */
+  const conn = navigator.connection;
+  if (conn && (conn.saveData || /^(slow-)?2g$/.test(conn.effectiveType || ''))) return;
+
+  /* Probe for a real WebGL context, then throw it away. `getContext` is the
+     only honest test — a `WebGLRenderingContext` in `window` says nothing about
+     whether the machine will actually give you one. */
+  const probe = document.createElement('canvas');
+  const gl = probe.getContext('webgl2') || probe.getContext('webgl');
+  if (!gl) return;
+  const lose = gl.getExtension('WEBGL_lose_context');
+  if (lose) lose.loseContext();
+
+  /* Coarse pointer plus little memory is the profile that stutters. It still
+     gets the scene, just a cheaper one. */
+  const lowPower =
+    (navigator.deviceMemory && navigator.deviceMemory <= 4) ||
+    window.matchMedia('(max-width: 620px)').matches;
+
+  import('./world.js')
+    .then(({ createWorld }) => {
+      const world = createWorld(canvas, { lowPower });
+      document.documentElement.classList.add('has-world');
+      window.addEventListener('pagehide', () => world.destroy(), { once: true });
+    })
+    .catch(() => {
+      /* A failed import leaves the static page exactly as it was. */
+      document.documentElement.classList.remove('has-world');
+    });
 })();
