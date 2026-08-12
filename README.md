@@ -2,22 +2,22 @@
 
 Portfolio landing page for Islam Soliman. One page, English.
 
-**No build step. One CSS file.** Two self-hosted fonts, two small scripts of our own, and
-one vendored dependency: Three.js, which drives the 3D layer. Nothing is ever fetched from
-another origin — the library is committed here, not pulled from a CDN.
+**No build step. One CSS file. Zero runtime dependencies.** Two self-hosted fonts and one
+small script of our own. Nothing is ever fetched from another origin.
 
 ```
 index.html            the page
 assets/css/site.css   the whole stylesheet
-assets/js/site.js     scrollspy, and the gate that decides whether the 3D loads at all
-assets/js/world.js    the scene: procedural layers, scroll-driven camera
-assets/js/vendor/     Three.js r0.185.1, MIT, vendored (two ESM files)
+assets/js/site.js     scrollspy and the prototype's tablist
 assets/fonts/         two variable .woff2 subsets, self-hosted
-assets/img/           five app screens, the Muhrah emblem, a social card, an SVG favicon
+assets/img/           nine app screens, the Muhrah emblem, a social card, an SVG favicon
 tools/og.html         source for the social card (not shipped)
 tools/cdp.mjs         DevTools-protocol driver, Node stdlib only (not shipped)
-tools/check-scene.mjs pixel assertions on the 3D layer (not shipped)
-tools/verify-dom.html DOM assertions across seven viewports (not shipped)
+tools/fit-test.html   the type-fitting rig; also re-derives the sizes (not shipped)
+tools/check-fit.mjs   can Archivo hold flush lines at all (not shipped)
+tools/check-hero.mjs  does the shipped page hold them (not shipped)
+tools/check-proto.mjs the prototype, including without a mouse (not shipped)
+tools/verify-dom.html DOM assertions across eleven viewports (not shipped)
 Caddyfile             static file server, Railway's $PORT
 Dockerfile            caddy:2-alpine, explicit COPY per path
 ```
@@ -28,23 +28,26 @@ Nothing under `tools/` reaches the web root — the Dockerfile copies `index.htm
 ## Verify it
 
 ```bash
-node tools/check-scene.mjs http://localhost:8145
+python3 -m http.server 8145 &
+node tools/check-fit.mjs && node tools/check-hero.mjs && node tools/check-proto.mjs && node tools/check-dom.mjs
 ```
 
-Then open `http://localhost:8145/tools/verify-dom.html` and read the `<pre>`.
+**Every design this replaced passed with zero console errors and zero failed requests.**
+Each defect they shipped was visual-only, so every harness asserts on pixels, measured
+advances or computed styles, and none of them looks at the console. Each carries canaries
+that must *report catching* a deliberately broken element before any PASS counts — a
+detector that has never fired is indistinguishable from a detector that cannot fire.
 
-**Both of the designs this replaced passed with zero console errors and zero failed
-requests.** Every defect they shipped was visual-only, so both harnesses assert on pixels
-and computed styles and neither one looks at the console. Each carries canaries that must
-*report catching* a deliberately broken element before any PASS counts — a detector that
-has never fired is indistinguishable from a detector that cannot fire.
+Three traps that make a run pass while proving nothing, all hit here already:
 
-Two traps that make a run pass while proving nothing, both already hit once here:
-`--enable-unsafe-swiftshader` is mandatory on Chrome 151 or headless has no WebGL context,
-the gate correctly declines, and every visual assertion passes against a static page. And
-**macOS has no `timeout` binary** — a previous pass wrapped Chrome in it with stderr
-discarded, so Chrome never launched and the run "passed" with zero checks. `cdp.mjs` bounds
-every wait in JavaScript instead.
+- **macOS has no `timeout` binary.** A previous pass wrapped Chrome in it with stderr
+  discarded, so Chrome never launched and the run "passed" with zero checks. `cdp.mjs`
+  bounds every wait in JavaScript instead.
+- **`document.getAnimations()` includes scroll-driven ones, which never finish.** Awaiting
+  all of them hangs forever; filter to `a.timeline === document.timeline`.
+- **Measuring before the entrance lands blames the stylesheet for the probe's timing.**
+  The first run of `check-hero.mjs` read the headline 33% short at 320px and 10% at 768px,
+  purely because crossing the 701px breakpoint restarts the animation.
 
 ## Run it
 
@@ -60,11 +63,23 @@ docker build -t elba4a-site . && docker run --rm -p 8080:80 -e PORT=80 elba4a-si
 
 ## Things worth knowing before editing
 
-**Fonts are self-hosted and must stay that way.** Schibsted Grotesk and Azeret Mono, both
-OFL, both variable, both the `latin` subset only — about 73KB for the pair. They live in
+**Fonts are self-hosted and must stay that way.** Archivo and Azeret Mono, both OFL, both
+variable, both the `latin` subset only — about 116KB for the pair. They live in
 `assets/fonts/` and are referenced by relative path. Do not swap either for a Google Fonts
-`<link>`: the page makes no third-party request today and that is worth keeping. Both are
-variable across their weight range, so there is one file per family, not one per weight.
+`<link>`: the page makes no third-party request today and that is worth keeping.
+
+**Archivo is not interchangeable, and Schibsted Grotesk cannot come back.** The display
+type is fitted line by line to the measure and the entrance widens the letterforms until
+they land on it, so the family must carry a real `wdth` axis. A dump of the shipped
+Schibsted subset's `fvar` found one axis: `wght` 400–900. Archivo carries `wght 100–900`
+and `wdth 62–125`, a 1.945x span measured in the browser rather than read off a foundry
+page. Any replacement needs the same, and `check-fit.mjs` refuses to report a pass without
+it.
+
+**The `@font-face` must declare `font-stretch: 62% 125%`.** Omit that line and every
+`font-stretch` value on the page silently clamps to 100%: the layout still looks right,
+the entrance quietly becomes a no-op, and nothing reports it. Use `font-stretch`, never
+`font-variation-settings` — the latter stops `font-weight` composing.
 
 **Boxes use CSS logical properties** (`margin-inline`, `inset-inline-start`,
 `border-block-end`) even though the page is LTR-only. They cost nothing and mean a
@@ -88,28 +103,6 @@ the start state back out to the base rule.
 the owner of the section rule; the rule is drawn on an `::after` with `transform` alone for
 exactly this reason. An earlier version animated both and the headings rendered half-faded.
 
-**The 3D layer is optional, and the gate runs before the import.** `site.js` checks for
-reduced motion, a data-saving preference, and a real WebGL context *before* it dynamically
-imports `world.js`. A client that fails any check never requests Three.js at all — verified,
-not assumed, with a positive control: on a normal client the log shows `world.js` once and
-`three.*` twice; with `--disable-gpu --disable-webgl` and again with
-`--force-prefers-reduced-motion`, both are zero while the page and `site.js` still load.
-The zeros only mean something because the normal run is non-zero. Keep every new check on
-that side of the import.
-
-**The probe asks for `webgl2` and nothing else.** three r185 requests `"webgl2"` and throws
-if it cannot have it — there is no WebGL1 path. An earlier gate fell back to
-`getContext('webgl')`, so a WebGL1-only client passed, downloaded the whole library, and
-then threw inside the import.
-
-**`.has-world` may not touch `position`, `z-index` or layout.** The canvas is
-`z-index: -1` unconditionally, so content never needs lifting above it. The rule that used
-to do the lifting was `.has-world body > :not(#world) { position: relative }`, and
-`:not(#world)` counts as an **ID** selector — it scored (1,1,1) and silently beat both
-`.skip { position: absolute }` and `.hdr { position: sticky }` at (0,1,0). One line put a
-black skip-link slab in the page corner, killed the sticky header, and shifted the page
-28px when the async import landed.
-
 **The skip link hides by size and `clip-path`, never by an offset.** `inset-block-start:
 -100%` resolves against the containing block's height, so anything that forces
 `position: relative` turns it into a visible black box at the page origin.
@@ -123,83 +116,75 @@ panels at opacity 0.4987 and section rules frozen half-drawn.
 its ground translucent and whatever sits behind — here, a 1px hairline grid — shows
 through, so identical sibling panels render in different colours.
 
-**No transform accumulates.** Every rotation in `world.js` is a pure function of
-`(scroll, time)` and is assigned, never `+=`. An unbounded `rotation.z += spin` walked a
-product screenshot onto its side in about two minutes and upside down in five, so any tab
-left open eventually showed the product broken. `tools/check-scene.mjs` greps for this.
-
-**The canvas paints only inside `.stage` rectangles.** It is full-viewport and fixed, but
-every frame it scissors to the boxes CSS laid out for it, so the 3D is a *cell of the page
-grid* rather than a backdrop behind everything. Text and geometry cannot share a pixel —
-geometrically, not by tuning.
-
-That one decision replaced four separate mitigations, all now deleted: fog, the
-88%-opaque section panels with `backdrop-filter`, the radial hero scrim, and a rule that
-kept every object beyond `x > 34`. Each existed to protect copy from a canvas sitting
-behind the whole page. `tools/check-scene.mjs` asserts it as a number: hide the canvas,
-shoot the same frame, and **zero differing pixels may fall outside a stage rect** — with a
-positive control first, because a diff of two identical pictures of a static page would
-otherwise pass.
-
-**The stage ground is a `z-index: -2` pseudo-element, never a background on the section.**
-Paint order is html paper → stage ground (-2) → canvas (-1) → text in normal flow. Put the
-background on `.hero` itself and it paints in the in-flow block-background phase, over the
-canvas, and the scene renders perfectly into a rectangle nobody can see. `body` is
-transparent for the same reason: an opaque body background covers the whole document.
-
-**`.has-world` may touch nothing but `#world`.** Asserted. The canvas is fixed and out of
-flow, so its arrival cannot move anything, and the page must look identical either way.
-
-**The camera is 32°, not 52°.** Fifty-two splays the edge of every box and is the loudest
-"WebGL demo" tell there is; thirty-two is a short telephoto, which is what makes a render
-read as product photography.
-
-**The material is a matcap, and that was measured, not assumed.** A bake-off rendered the
-same object under a procedural PMREM environment, a generated equirect, a hybrid with a
-grain roughness map, and two generated matcaps. The procedural environment lost — five
-flat colour boxes reflect five soft blobs and read as dark plastic. A matcap encodes the
-whole shading response, grain included. It bakes into view space, which is correct here
-precisely because the *object* turns under a near-fixed camera.
-
-**Every count in the part is a real number, milled into it.** Fourteen perforations because
-there are fourteen Edge Functions; thirty-three because there are thirty-three Postgres
-tables. If those figures change in the work they change in `world.js`, or the part is
-lying about the thing it depicts.
-
-**The band's rows and plates are tied by colour and timing, never by pixel position.** As
-the scroll crosses each fifth of the track, one row lights and that plate swaps to the
-gold matcap. Nothing projects a 3D position into screen space to line up with a label, so
-nothing can drift out of register at an unexpected viewport. With the scene absent every
-row simply reads at full strength — the finished state is the default, and the scrub only
-dims what is not current.
-
-**The band frames its camera for the OPEN gap the whole way through.** Refitting to the
-live bounding sphere pulls the camera back at exactly the rate the plates separate, so the
-spread cancels itself out and the part appears to sit still. Hold the frame and it grows
-into its cell instead.
-
-**The band rotates toward the viewer's left as it opens, not away.** The stack runs along
-local Z and the camera sits mostly along +X, so at the hero's 28° the stack axis is only
-~36° off the view axis and the plates queue up behind one another. Turning down to about
--5° puts it ~67° off — near-maximum lateral separation with the drilled faces still turned
-toward you. A full -30° is geometrically perpendicular and useless: plate edges, no
-evidence.
-
-**The scene never holds content.** Every word, number and link lives in the DOM. `world.js`
-renders geometry and textures only. This is what makes the fallback a complete page rather
-than a stub, and it is why the canvas carries `aria-hidden`.
-
-**All other motion is CSS.** Scroll reveals use `animation-timeline: view()`. There is no
+**All motion is CSS.** Scroll reveals use `animation-timeline: view()`. There is no
 animation library and no IntersectionObserver driving visibility; the observer in
 `site.js` only marks the current nav link. GSAP is deliberately absent.
 
-**Every count in the scene is a real number.** Fourteen edge nodes, thirty-three data slabs.
-If those figures change in the work, change them in `world.js` too, or the geometry starts
-lying.
+### The display type
+
+**The lines are fitted by SIZE at one width, not by width at one size.** Fitting by width
+is arithmetically impossible with this copy: at one font size every line sits pinned at
+the 125% ceiling and still falls 48% short of the measure. `tools/fit-test.html` solves
+each line's size by bisection against its rendered advance, and `check-fit.mjs` prints the
+`cqi` values that go into the stylesheet. **Do not hand-tune them, and re-derive them if
+the copy changes.**
+
+**The sizes are `cqi` against a capped container, never `vw`.** `--gut` clamps at 1066px,
+so a clamped `font-size` would freeze while the measure kept widening: past ~1460px every
+line would fall short of the margin and the right edge would go ragged, which is the
+templated look this design exists to avoid. Capping the *container* makes the ratio
+advance/measure invariant from 320px to 2560px.
+
+**`letter-spacing` in `em` must sit on the element that carries the font-size.** It
+computes to an absolute length where it is declared and inherits as that length. On
+`.hero__h` it resolved against the inherited 17px body size instead of the 215px line, and
+every line overran the measure by 6%.
+
+**Four lines below 701px, two above, with the column capped at 440px in between.** The
+three-way break is not offered: solved, its line sizes spread 1.85x, so the long middle
+line sets visibly smaller than the two around it and the block reads as a mistake.
+Uncapped, four lines at a 640px measure make an 861px block that overflows the fold on a
+700x900 tablet.
+
+**Weight is uniform across the headline.** Dropping the last line to 400 would narrow it
+and break the fit, which is the whole premise. The emphasis is carried by `--accent` on
+one word instead.
+
+### The prototype
+
+**The screens are the product's own captures, and nothing about them is drawn.** Nine App
+Store screenshots at their native 1320x2868, re-encoded at an exact half. No stock phone
+PNG, no drawn notch — the Dynamic Island is in the pixels — no side buttons, no angle, no
+reflection.
+
+**The corner radii are measurements.** `12.5cqw` is 55pt of 440pt, the device's own. The
+bottom is `3.4cqw`, not `12.5`: probing the largest uniform corner region on all nine
+found tops safe at 58pt or more everywhere but bottoms as tight as 15pt, so a true bottom
+radius would clip live content on four of them.
+
+**`container-type` goes on `.phone`, the parent, not on `.phone__frame` itself.** An
+element is a container for its descendants, not for itself, so `cqw` in the frame's own
+`border-radius` fell through to the viewport: 12.5% of 1280px is 160px and the device
+rendered with a domed top.
+
+**The 2px ink ring is the mechanism, not the decoration.** The screens are iOS light mode
+on `#F2F2F7`: 1.08:1 against `--paper` and invisible, 16.17:1 against `--ink`. The ring
+holds on any ground, in any ambient light, whatever the palette does later. The `--slab`
+band behind it is composition only — delete it and the band still works.
+
+**Navigation never infers a nav graph the screenshots do not show.** The tab strip names
+all nine; the only in-screen hotspots are the three chevrons printed on Home, going where
+their own labels say. The device's own tab bar is part of the image and is not wired.
+
+**Every screen ships in the markup and is reachable before the script runs.** The script
+only makes it one-at-a-time, and it adds `.proto--live` to say so — hiding the screens in
+the stylesheet would leave eight unreachable on any client where it does not run.
 
 **Colours are measured, not chosen.** Against `--paper` (`#FBFBF9`): `--ink` 17.4:1 ·
-`--accent` 7.5:1 · `--ink-2` 6.6:1. On `--paper-2` the muted text still measures 6.1:1.
-Re-measure before changing any of them.
+`--accent` 7.5:1 · `--ink-2` 6.6:1. Against `--slab` (`#DCDCD4`) every muted token drops a
+grade — `--ink-2` is 4.95:1 and `--accent` is 5.4:1, both AA and not AAA — so the band uses
+`--slab-ink-2` (`#404048`, 7.44:1) and carries no links outside the tab pills, which have
+their own `--ink` ground. Re-measure before changing any of them.
 
 **Assets are cached forever.** `Caddyfile` sends `immutable` for `/assets/*`, so any edited
 asset needs its `?v=N` bumped in `index.html`.
@@ -239,7 +224,10 @@ These mirror the private portfolio dossier. If one changes there, change it here
   shipped, and do not link `hekta.money` — that domain is parked. `legal.hekta.money` is
   public and live over https, and is the one Hekta link the page carries.
 - Muhrah is a brand Islam **owns**, not client work. Its storefront sits behind a password
-  page, so it gets no link.
+  page. It used to get no link; on 2026-08-12 Islam chose to link it anyway, so the page
+  carries `muhrah.shop` **with copy stating the lock screen is deliberate**. Never link it
+  bare — a visitor meeting a password prompt with no explanation reads it as broken.
+  `linktr.ee/Muhrah_009` is public by design and needs no caveat.
 - Horus Transfer's repo is private and the site is not deployed. No link, and never "live".
 - NOOR may be named and linked. It is live at `noor-eg.net` with a public repo. No other
   client may be named.
