@@ -6,10 +6,19 @@
 
 /* ----------------------------------------------------------------- fonts */
 
+/* Archivo replaces Schibsted Grotesk, on a capability rather than a taste. The
+   display type is fitted to the measure so every line ends flush on the right
+   margin; the entrance widens the letterforms until they land there. Both need
+   a `wdth` axis, and a dump of the shipped Schibsted subset's `fvar` found one
+   axis only: `wght` 400–900. */
 @font-face {
-  font-family: "Schibsted Grotesk";
-  src: url("/assets/fonts/schibsted-grotesk-latin.woff2") format("woff2");
-  font-weight: 400 900;
+  font-family: "Archivo";
+  src: url("/assets/fonts/archivo-latin.woff2") format("woff2");
+  font-weight: 100 900;
+  /* Delete this line and every `font-stretch` value below silently clamps to
+     100%: the fit still looks right, the entrance becomes a no-op, and nothing
+     reports it. tools/check-fit.mjs asserts the axis renders. */
+  font-stretch: 62% 125%;
   font-style: normal;
   font-display: swap;
 }
@@ -17,7 +26,9 @@
 @font-face {
   font-family: "Azeret Mono";
   src: url("/assets/fonts/azeret-mono-latin.woff2") format("woff2");
-  font-weight: 400 600;
+  /* The file carries 100–900. This rule used to claim 400–600, so 300 weights
+     of a font already on the wire were unreachable. */
+  font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }
@@ -49,18 +60,15 @@
   --on-stage-2:   #A6A6B0;
   --stage-accent: #7FA0FF;
 
-  --sans: "Schibsted Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sans: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: "Azeret Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
   --shell: 1120px;
+  /* The hero runs wider than the reading column: display type needs the room,
+     body copy does not. */
+  --bleed: 1680px;
   --gut: clamp(1.25rem, 4.5vw, 3rem);
   --rhythm: clamp(5rem, 12vh, 9rem);
-
-  /* Sized against the hero's TYPE COLUMN, not the viewport. The headline is
-     two masked lines, and at 92px "I build every" needed ~560px in a ~500px
-     column — so it broke to three and left "myself." stranded on its own,
-     which defeats the per-line masks entirely. */
-  --fs-display: clamp(2.5rem, 5.4vw, 4.5rem);
   /* Must stay above the project titles at every viewport. It used to cap at
      34px against their 40px, so "Work" read as subordinate to "Hekta" and the
      whole page hierarchy inverted. */
@@ -255,89 +263,106 @@ code {
 
 /* ------------------------------------------------------------------ hero */
 
-/* The hero is a dark stage, not paper. Not a mood: Hekta's screens are iOS
-   light mode on #F2F2F7, three points off `--paper`, so on paper the product
-   is an invisible rectangle — and the graphite the material bake settled on
-   only exists against a near-black ground. The rest of the page stays paper;
-   the step between them is ~17:1, which reads as a deliberate edge. A 7% tint
-   step is what reads as a rendering error. */
+/* The hero is one sentence, set as large as the measure allows, on paper.
+   `100svb` with the product band as the next section means the fold does the
+   cropping: at any viewport height the reader sees the sentence and the top of
+   a real screen underneath it, with no magic number anywhere. */
 .hero {
   position: relative;
-  color: var(--on-stage);
   min-block-size: 100svb;
   display: grid;
   align-items: center;
   padding-block: clamp(3rem, 8vh, 5rem);
 }
 
-/* The dark ground is a pseudo-element at z-index -2, NOT a background on the
-   section. That ordering is the whole architecture: html paper at the bottom,
-   this ground above it, the canvas at -1 above that, and the text in normal
-   flow above everything. Put the background on `.hero` itself and it paints in
-   the in-flow block-background phase — over the canvas — and the scene renders
-   perfectly into a rectangle nobody can see. Which is exactly what happened.
-   `.hero` keeps `z-index: auto` so it does not create a stacking context and
-   trap this below itself. */
-.hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-  background: var(--stage);
-}
-
 .hero__in {
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-  gap: clamp(1.5rem, 3vw, 2.5rem);
-  align-items: center;
   inline-size: 100%;
+  max-inline-size: calc(var(--bleed) + var(--gut) * 2);
+  margin-inline: auto;
+  padding-inline: var(--gut);
 }
 
-/* Everything inside the hero is re-pointed at the stage palette. The paper
-   tokens are all measured against #FBFBF9 and every one of them fails here —
-   `--accent` is 1.9:1 on this ground. */
-.hero .eyebrow,
-.hero .open__k { color: var(--on-stage-2); }
-.hero__h em { color: var(--stage-accent); }
-.hero__sub { color: var(--on-stage-2); }
-.hero .open { border-block-start-color: rgb(255 255 255 / .16); }
-.hero .open__l a {
-  color: var(--stage-accent);
-  border-block-end-color: color-mix(in srgb, var(--stage-accent) 40%, transparent);
-}
-.hero .open__l a:hover { border-block-end-color: var(--stage-accent); }
-.hero :focus-visible { outline-color: var(--stage-accent); }
+/* The container the display type is measured against. Capping the CONTAINER
+   rather than the font-size is the whole trick: `--gut` clamps at 1066px, so a
+   clamped font-size would freeze while the measure kept widening, and past
+   ~1460px every line would fall short of the margin. Sized in `cqi` against
+   this box, the ratio advance/measure is invariant from 320px to 2560px —
+   asserted at nine viewports by tools/check-fit.mjs. */
+.hero__type { container-type: inline-size; }
 
-@media (max-width: 860px) {
-  /* Type first, then the part beneath it. The stage keeps a real box rather
-     than collapsing, so the page does not reflow when the scene loads and does
-     not look like something failed when it never does. */
-  .hero__in { grid-template-columns: 1fr; }
-  .hero { min-block-size: auto; padding-block: clamp(2.5rem, 7vh, 4rem); }
+@media (min-width: 441px) and (max-width: 700px) {
+  /* Between the four-line and two-line breaks the column stops growing instead
+     of the type doing it. Uncapped, four lines at a 640px measure make an
+     861px block that overflows the fold on a 700x900 tablet. */
+  .hero__type { max-inline-size: 440px; }
 }
 
 .hero__h {
-  font-size: var(--fs-display);
-  font-weight: 500;
-  line-height: .98;
-  letter-spacing: -.038em;
-  margin-block: 1.5rem 0;
-  max-inline-size: 14ch;
+  font-weight: 760;
+  line-height: .90;          /* sentence case has descenders; .84 collides */
+  margin-block: clamp(1.5rem, 4vh, 2.5rem) 0;
+  font-stretch: 100%;
+  /* A line that is one rounding error too wide would wrap and destroy the
+     fitting, so wrapping is off — and clipped rather than scrollable, because
+     a fallback face is wider than Archivo and would otherwise put a horizontal
+     scrollbar on the document for the length of one font swap. */
+  white-space: nowrap;
+  overflow-x: clip;
 }
 .hero__h em { font-style: normal; color: var(--accent); }
 
-/* Each line is its own clipping window so the type rises out of a mask
-   instead of just fading in. */
-.line { display: block; overflow: hidden; padding-block-end: .06em; }
-.line > span { display: block; }
+/* Each line's size is solved so its advance lands on the measure. These are
+   measurements, not taste — read off a bisection against the rendered advance
+   in tools/fit-test.html, which is also what re-derives them if the copy
+   changes. Uniform weight throughout: dropping the last line to 400 would
+   narrow it and break the fit that is the entire premise. */
+/* `letter-spacing` in `em` computes to an absolute length at the element that
+   declares it, and inherits as that length. Declared on `.hero__h` it resolved
+   against the inherited 17px body size — 0.5px instead of 6.9px — and every
+   line overran the measure by ~6%. It has to sit where the font-size is. */
+.hero__h .ln,
+.hero__h .l  { letter-spacing: -.032em; }
+.hero__h .ln { display: contents; }        /* below 701px the four spans ARE the lines */
+.hero__h .l  { display: block; }
+.hero__h .l1 { font-size: 36.92cqi; }
+.hero__h .l2 { font-size: 38.89cqi; }
+.hero__h .l3 { font-size: 43.76cqi; }
+.hero__h .l4 { font-size: 30.07cqi; }
 
-.hero__sub {
-  margin-block-start: 1.75rem;
-  max-inline-size: 46ch;
-  color: var(--ink-2);
-  font-size: clamp(1.0625rem, 1.5vw, 1.25rem);
+@media (min-width: 701px) {
+  /* Two lines, and the pair wrappers become the fitted lines. Two inline spans
+     between block boundaries form one anonymous block box, so "I build every"
+     sets as a single line and the markup never changes across breakpoints. */
+  .hero__h .ln { display: block; }
+  .hero__h .l  { display: inline; font-size: inherit; }
+  .hero__h .ln1 { font-size: 18.38cqi; }
+  .hero__h .ln2 { font-size: 17.39cqi; }
 }
+
+/* The one gesture on the page. Every line starts condensed — short of the
+   margin by nearly half — and the letterforms widen until the sentence lands
+   flush. Nothing fades, translates or blurs, which is what every template
+   does; this needs a real width axis, so it cannot be one. The finished widths
+   are the resting state above, so reduced motion, a missing stylesheet or an
+   engine without `font-stretch` all get flush type rather than an empty box.
+   Line heights never change during it, so the block cannot shift the page. */
+@media (prefers-reduced-motion: no-preference) {
+  /* Whichever element is the LINE at this breakpoint is the one that widens.
+     Animate both and the two halves of a joined line would widen out of step
+     with each other. */
+  @media (max-width: 700px) {
+    .hero__h .l  { animation: fit .9s var(--ease) both; }
+    .hero__h .l2 { animation-delay: .09s; }
+    .hero__h .l3 { animation-delay: .18s; }
+    .hero__h .l4 { animation-delay: .27s; }
+  }
+  @media (min-width: 701px) {
+    .hero__h .ln  { animation: fit .9s var(--ease) both; }
+    .hero__h .ln2 { animation-delay: .09s; }
+  }
+}
+
+@keyframes fit { from { font-stretch: 62%; } to { font-stretch: 100%; } }
 
 /* The four things a reader can actually open, handed over before any card. */
 .open {
@@ -716,18 +741,12 @@ code {
    preference, an extension, an old engine — still leaves a readable page
    rather than an empty box where the content should be. */
 @media (prefers-reduced-motion: no-preference) {
-  .line > span {
-    transform: translateY(105%);
-    animation: line-in 1s var(--ease) forwards;
-  }
-  .line:nth-child(2) > span { animation-delay: .08s; }
-
+  /* The headline's own entrance is the `fit` widening in the hero block above.
+     These two are the frame around it and arrive after it has landed. */
   .hero .eyebrow { opacity: 0; animation: fade-in .7s var(--ease) .1s forwards; }
-  .hero__sub { opacity: 0; animation: rise .8s var(--ease) .34s forwards; }
-  .open { opacity: 0; animation: rise .8s var(--ease) .46s forwards; }
+  .open { opacity: 0; animation: rise .8s var(--ease) .9s forwards; }
 }
 
-@keyframes line-in { to { transform: translateY(0); } }
 @keyframes fade-in { to { opacity: 1; } }
 @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 

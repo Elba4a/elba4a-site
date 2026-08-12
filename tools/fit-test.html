@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>fit test — does Archivo hold flush lines?</title>
+
+<!--
+  The kill test for direction 5.
+
+  The premise of the whole design is that every display line ends flush on the
+  right margin at every viewport. If that fails the page collapses into "big
+  text that wraps weirdly", which is the templated look the direction exists to
+  avoid. It fails viewport-dependently — perfect at 1280, short at 1600 — so it
+  would ship looking correct on one monitor.
+
+  This file answers two questions with numbers instead of taste:
+
+    A. Fit by WIDTH   — one font-size, per-line `font-stretch`.
+                        Short lines get expanded, long lines get condensed.
+    B. Fit by SIZE    — one font-stretch, per-line `font-size`.
+                        Classic poster setting; all lines share one letterform.
+
+  Both are solved here by bisection against the real rendered advance width, so
+  no magic number is hand-carried into the stylesheet.
+
+  Nothing here ships. The Dockerfile copies index.html and assets/ explicitly.
+-->
+
+<style>
+@font-face {
+  font-family: "Archivo";
+  src: url("../assets/fonts/archivo-latin.woff2") format("woff2");
+  font-weight: 100 900;
+  /* Omit this range and every font-stretch value silently clamps to 100%,
+     which is one of the three ways this direction dies quietly. */
+  font-stretch: 62% 125%;
+  font-display: block;
+}
+
+html { background: #FBFBF9; color: #16161A; }
+body { margin: 0; font-family: "Archivo", sans-serif; }
+
+/* The measure. Capping the CONTAINER rather than the font-size is the trick:
+   above 1066px --gut clamps, so a clamped font-size would freeze while the
+   measure kept widening, and every line would fall short past ~1460px. */
+#box {
+  --gut: clamp(1.25rem, 4.5vw, 3rem);
+  max-inline-size: 1680px;
+  margin-inline: auto;
+  padding-inline: var(--gut);
+  container-type: inline-size;
+}
+
+.l {
+  display: block;
+  margin: 0;
+  line-height: .90;
+  letter-spacing: -.032em;
+  font-weight: 760;
+  white-space: nowrap;      /* a wrap here is a failure, not a layout */
+  width: max-content;       /* so getBoundingClientRect() is the ADVANCE, not the box */
+}
+
+/* Read by the solver; overwritten per strategy. */
+#box[data-mode="width"] .l { font-size: var(--fs); font-stretch: var(--w); }
+#box[data-mode="size"]  .l { font-size: var(--fs); font-stretch: var(--w); }
+</style>
+
+<div id="box"><div id="lines"></div></div>
+
+<script type="module">
+const SETS = {
+  wide:   ["I build", "every layer", "myself."],
+  narrow: ["I build", "every", "layer", "myself."],
+};
+
+const box = document.getElementById('box');
+const host = document.getElementById('lines');
+
+const measure = () => {
+  const cs = getComputedStyle(box);
+  return box.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+};
+
+function render(words) {
+  host.replaceChildren(...words.map((t) => {
+    const el = document.createElement('div');
+    el.className = 'l';
+    el.textContent = t;
+    return el;
+  }));
+  return [...host.children];
+}
+
+const widthOf = (el) => el.getBoundingClientRect().width;
+
+/* Bisection on one CSS property until the line's advance lands on the measure.
+   Bisection rather than a ratio guess because neither axis is linear in the
+   rendered advance — kerning, hinting and letter-spacing all bend it. */
+function solve(el, prop, lo, hi, target, unit) {
+  for (let i = 0; i < 40; i++) {
+    const mid = (lo + hi) / 2;
+    el.style.setProperty(prop, mid + unit);
+    (widthOf(el) < target ? (lo = mid) : (hi = mid));
+  }
+  return (lo + hi) / 2;
+}
+
+/* --- A: one size, per-line width ------------------------------------------
+   font-size is expressed in cqi so the whole block is scale-invariant: advance
+   in em is fixed by the wdth value, and font-size is a constant fraction of the
+   container, so the ratio advance/measure does not move with viewport width. */
+function fitByWidth(words, cqi) {
+  const els = render(words);
+  box.dataset.mode = 'width';
+  const target = measure();
+  const out = els.map((el) => {
+    el.style.setProperty('--fs', cqi + 'cqi');
+    const w = solve(el, 'font-stretch', 62, 125, target, '%');
+    el.style.setProperty('--w', w + '%');
+    return { text: el.textContent, wdth: +w.toFixed(1), px: +widthOf(el).toFixed(1) };
+  });
+  const height = els.reduce((a, el) => a + el.getBoundingClientRect().height, 0);
+  return { target: +target.toFixed(1), lines: out, blockHeight: +height.toFixed(1) };
+}
+
+/* --- B: one width, per-line size ------------------------------------------ */
+function fitBySize(words, wdth) {
+  const els = render(words);
+  box.dataset.mode = 'size';
+  const target = measure();
+  const out = els.map((el) => {
+    el.style.setProperty('--w', wdth + '%');
+    /* Solve in cqi, not px, for the same scale-invariance as A. 1cqi is 1% of
+       the container's inline size, so the solved value is a pure ratio. */
+    const fs = solve(el, '--fs', 1, 60, target, 'cqi');
+    el.style.setProperty('--fs', fs + 'cqi');
+    return { text: el.textContent, cqi: +fs.toFixed(2),
+             px: +widthOf(el).toFixed(1),
+             sizePx: +parseFloat(getComputedStyle(el).fontSize).toFixed(1) };
+  });
+  const height = els.reduce((a, el) => a + el.getBoundingClientRect().height, 0);
+  return { target: +target.toFixed(1), lines: out, blockHeight: +height.toFixed(1) };
+}
+
+/* Applies a solved plan and reports the worst flush error as a fraction of the
+   measure. This is what gets asserted across viewports. */
+function verify(plan, mode) {
+  const els = render(plan.lines.map((l) => l.text));
+  box.dataset.mode = mode;
+  const target = measure();
+  let worst = 0, worstLine = null;
+  els.forEach((el, i) => {
+    const L = plan.lines[i];
+    el.style.setProperty('--fs', (mode === 'size' ? L.cqi + 'cqi' : plan.cqi + 'cqi'));
+    el.style.setProperty('--w', (mode === 'size' ? plan.wdth : L.wdth) + '%');
+    const err = Math.abs(widthOf(el) - target) / target;
+    if (err > worst) { worst = err; worstLine = L.text; }
+  });
+  return { target: +target.toFixed(1), worst: +worst.toFixed(5), worstLine };
+}
+
+/* The canary. A deliberately wrong value must be REPORTED CAUGHT before any
+   PASS above counts — a detector that has never fired cannot be told from one
+   that cannot fire. */
+function canary(plan, mode) {
+  const bad = structuredClone(plan);
+  if (mode === 'size') bad.lines[0].cqi *= 0.7; else bad.lines[0].wdth = 62;
+  const r = verify(bad, mode);
+  return { caught: r.worst > 0.015, worst: r.worst };
+}
+
+await document.fonts.load('760 100px Archivo');
+await document.fonts.ready;
+
+/* Between the 4-line and 2-line breakpoints the display column is capped, so
+   the four lines stop growing with the viewport instead of overflowing the
+   fold. Modelled here because it changes every measurement that follows. */
+const setCap = (px) => { box.style.maxInlineSize = px ? px + 'px' : '1680px'; };
+
+window.__fit = { fitByWidth, fitBySize, verify, canary, measure, setCap,
+                 loaded: document.fonts.check('760 100px Archivo') };
+document.documentElement.dataset.ready = '1';
+</script>
+</html>
