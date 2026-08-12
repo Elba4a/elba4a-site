@@ -401,6 +401,7 @@ code {
 .proj__side { display: flex; flex-direction: column; gap: 1.125rem; }
 .proj__meta { font-size: .9375rem; color: var(--ink-2); max-inline-size: 44ch; }
 
+.proj__link { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; }
 .proj__link a {
   font-family: var(--mono);
   font-size: .8125rem;
@@ -710,10 +711,6 @@ code {
 }
 
 @media (max-width: 620px) {
-  /* The nav used to be `display: none` here with nothing replacing it, which
-     left Work / Approach / Stack reachable only by scrolling 8,600px. The CTA
-     goes instead — Contact is the last section and the nav still reaches it. */
-  .hdr__cta { display: none; }
   .hdr__nav { gap: 1.125rem; }
   .hdr__nav a { font-size: .8125rem; }
   .hdr__id { margin-inline-end: auto; }
@@ -722,11 +719,24 @@ code {
   .s-head { flex-direction: column; gap: .5rem; }
 }
 
-/* Below this the name and three nav items stop fitting on one line together. */
-@media (max-width: 430px) {
-  .hdr__in { gap: .875rem; }
-  .hdr__nav { gap: .875rem; }
-  .hdr__nav a { font-size: .75rem; }
+/* Two rows, never a hidden control. Below this width the three items cannot
+   share a line — about 320px of inner width against roughly 124 for the name,
+   150 for the nav and 100 for the button. The first fix here hid the button,
+   which is the bug Islam reported: a control that disappears reads as broken,
+   and trading the nav back for the CTA solved nothing. Wrapping costs ~36px of
+   header height and loses nothing at all. */
+@media (max-width: 520px) {
+  .hdr__in {
+    flex-wrap: wrap;
+    row-gap: .625rem;
+    padding-block: .625rem;
+  }
+  .hdr__nav {
+    order: 3;
+    flex-basis: 100%;
+    gap: 1.25rem;
+  }
+  .hdr__nav a { font-size: .8125rem; }
 }
 
 /* --------------------------------------------------------- reduced motion */

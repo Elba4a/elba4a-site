@@ -21,6 +21,23 @@ const csp = (el, p) => W().getComputedStyle(el, p);
 
 await load();
 
+/* The page sets `scroll-behavior: smooth`, so every scrollTo below ANIMATES.
+   Two snapshots taken 120ms apart during a 7,800px smooth scroll catch every
+   element in a different place, and the diff reads as a layout shift that is
+   not there — ten failures against a page whose geometry is provably
+   identical. Measure against instant scrolling or the suite is flaky. */
+D().documentElement.style.scrollBehavior = 'auto';
+
+/* Let the hero's entrance animations land before anything is measured, or the
+   first viewport catches the headline mid-rise and reports it as movement.
+   Filtered to the document timeline on purpose: scroll-driven animations are
+   never "finished", so awaiting those would hang here forever. */
+await Promise.all(
+  D().getAnimations()
+    .filter((a) => a.timeline === D().timeline)
+    .map((a) => a.finished.catch(() => {}))
+);
+
 /* ---- canaries: prove the detectors fire before any PASS is believable ---- */
 {
   const c = D().createElement('div');
@@ -38,9 +55,17 @@ await load();
   const keep = a.style.position; a.style.position = 'static';
   if (cs(a).position !== 'sticky') caught('position');
   a.style.position = keep;
+
+  /* Arm the header-control detector against the exact regression it exists
+     for: hide the CTA the way the broken breakpoint did, and require the
+     check to notice. */
+  const cta = D().querySelector('.hdr__cta');
+  const keepD = cta.style.display; cta.style.display = 'none';
+  if (cs(cta).display === 'none' || cta.getBoundingClientRect().width === 0) caught('hidden-control');
+  cta.style.display = keepD;
 }
 
-const VP = [[360,780],[390,844],[620,900],[621,900],[768,1024],[1280,900],[1920,1080]];
+const VP = [[320,640],[360,780],[390,844],[430,900],[519,900],[521,900],[620,900],[621,900],[768,1024],[1280,900],[1920,1080]];
 
 for (const [w, h] of VP) {
   f.width = w; f.height = h;
@@ -77,10 +102,16 @@ for (const [w, h] of VP) {
       `${de.scrollWidth} vs ${de.clientWidth}`);
   de.style.overflowX = prev;
 
-  /* ---- 3. nav reachable at every width ---------------------------------- */
-  const nav = D().querySelector('.hdr__nav');
-  log(cs(nav).display !== 'none' && nav.getBoundingClientRect().width > 0,
-      `nav present @${w}`, cs(nav).display);
+  /* ---- 3. every header control is reachable at every width --------------
+     Not just the nav. The first attempt at this traded the CTA away to make
+     room for the nav, which is how a button vanished on mobile. Any control
+     that resolves to zero width is a failure regardless of which one it is. */
+  for (const sel of ['.hdr__nav', '.hdr__cta', '.hdr__id']) {
+    const el = D().querySelector(sel);
+    const r = el.getBoundingClientRect();
+    log(cs(el).display !== 'none' && r.width > 0 && r.height > 0,
+        `${sel} reachable @${w}`, `${cs(el).display} ${Math.round(r.width)}x${Math.round(r.height)}`);
+  }
 
   /* ---- 4. nothing at rest is half-faded --------------------------------- */
   W().scrollTo(0, D().body.scrollHeight); await settle(420);

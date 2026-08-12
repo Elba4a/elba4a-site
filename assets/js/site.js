@@ -74,6 +74,18 @@
   const lose = gl.getExtension('WEBGL_lose_context');
   if (lose) lose.loseContext();
 
+  /* TEMPORARY, and it comes out with the next rebuild.
+     The scene is held to the right of the reading column, which works while the
+     column is the left half of a wide viewport. Below ~700px the column is the
+     FULL width, so there is no "right" to move to and the geometry lands on the
+     lede — cubes sitting on the word "schema". Half-visible geometry over body
+     copy is worse than no geometry, so narrow viewports skip it entirely and do
+     not pay the 183KB either.
+     The real fix is the scissor architecture: the canvas renders only into
+     rectangles taken from real DOM elements, so mobile gets the scene inside
+     its own laid-out cell and this whole class of overlap stops existing. */
+  if (window.matchMedia('(max-width: 700px)').matches) return;
+
   /* Coarse pointer plus little memory is the profile that stutters. It still
      gets the scene, just a cheaper one. */
   const lowPower =

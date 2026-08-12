@@ -8,3 +8,7 @@ DESIGN.md
 
 # Verification output — screenshots, never committed.
 tools/.shots/
+tools/.bake/
+tools/bake.html
+tools/sheet.html
+tools/shoot-bake.mjs
