@@ -12,6 +12,7 @@ assets/js/site.js     scrollspy and the prototype's tablist
 assets/fonts/         two variable .woff2 subsets, self-hosted
 assets/img/           nine app screens, the Muhrah emblem, a social card, an SVG favicon
 tools/og.html         source for the social card (not shipped)
+tools/shoot-og.mjs    renders the card, refusing a wrong one (not shipped)
 tools/cdp.mjs         DevTools-protocol driver, Node stdlib only (not shipped)
 tools/fit-test.html   the type-fitting rig; also re-derives the sizes (not shipped)
 tools/check-fit.mjs   can Archivo hold flush lines at all (not shipped)
@@ -190,16 +191,25 @@ their own `--ink` ground. Re-measure before changing any of them.
 asset needs its `?v=N` bumped in `index.html`.
 
 **The social card is generated, not drawn.** `tools/og.html` is the source and the PNG is a
-screenshot of it. Render it **over the local http server, not `file://`** — Chrome applies
-CORS to fonts, a `file://` origin fails it, and the card silently falls back to a system
-face:
+screenshot of it:
 
 ```bash
-CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-"$CHROME" --headless --disable-gpu --hide-scrollbars --force-device-scale-factor=1 \
-  --virtual-time-budget=4000 --window-size=1200,630 \
-  --screenshot="assets/img/og.png" "http://localhost:8145/tools/og.html"
+node tools/shoot-og.mjs
 ```
+
+It refuses to write a card that is wrong in either of the two ways this one fails silently.
+**It must render over the local http server, never `file://`** — Chrome applies CORS to
+fonts, a `file://` origin fails it, and the card falls back to a system face with no error;
+the script asserts Archivo actually loaded. And the display lines are fitted to the measure,
+so a fallback face, a missing `font-stretch` range or a stale `cqi` value all still lay out,
+just not flush — it measures both advances instead.
+
+It also reads the written PNG's own `IHDR`. `--window-size` is not the viewport: the first
+run captured 1200x543 while `og:image:height` declares 630, and nothing about the picture
+said so.
+
+The two `cqi` values in `og.html` are the same ones in `site.css`. If `check-fit.mjs`
+re-solves them, they change in both places.
 
 `tools/icon.html` holds a **copy** of the favicon artwork, not an `<img>` of it — a
 `viewBox`-only SVG has no intrinsic size, so it renders at the browser default instead of

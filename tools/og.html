@@ -1,24 +1,29 @@
 <!doctype html>
 <!-- Source for assets/img/og.png. Not shipped — the Dockerfile copies explicit
-     paths and tools/ is not one of them. Regenerate with the command in
-     README.md after changing anything here.
+     paths and tools/ is not one of them. Regenerate with tools/shoot-og.mjs,
+     which asserts the type is fitted and the real face loaded before it writes
+     the PNG.
 
      Render it over the local http server, not file://, so the @font-face files
      load; Chrome applies CORS to fonts and a file:// origin fails it, which
-     silently falls back to a system face and quietly changes the card. -->
+     silently falls back to a system face and quietly changes the card.
+
+     LinkedIn's Featured card pulls this image, so changing it changes what
+     Islam's profile shows. -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <style>
   @font-face {
-    font-family: "Schibsted Grotesk";
-    src: url("/assets/fonts/schibsted-grotesk-latin.woff2") format("woff2");
-    font-weight: 400 900;
+    font-family: "Archivo";
+    src: url("/assets/fonts/archivo-latin.woff2") format("woff2");
+    font-weight: 100 900;
+    font-stretch: 62% 125%;
   }
   @font-face {
     font-family: "Azeret Mono";
     src: url("/assets/fonts/azeret-mono-latin.woff2") format("woff2");
-    font-weight: 400 600;
+    font-weight: 100 900;
   }
 
   * { box-sizing: border-box; margin: 0; }
@@ -26,35 +31,41 @@
   body {
     background: #FBFBF9;
     color: #16161A;
-    font-family: "Schibsted Grotesk", system-ui, sans-serif;
-    padding: 74px 84px;
+    font-family: "Archivo", system-ui, sans-serif;
+    padding: 60px 84px 64px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    position: relative;
     overflow: hidden;
     -webkit-font-smoothing: antialiased;
   }
-  .top, .btm { position: relative; }
+
+  /* The same container the page measures against, so the same cqi values
+     produce the same fit. If check-fit.mjs ever re-solves them, they change in
+     exactly two places: site.css and here. */
+  .top { container-type: inline-size; }
+
   .eyebrow {
     font-family: "Azeret Mono", ui-monospace, monospace;
-    font-size: 17px;
+    font-size: 16px;
     letter-spacing: .16em;
     text-transform: uppercase;
     color: #5A5A63;
   }
   h1 {
-    font-size: 96px;
-    font-weight: 500;
-    line-height: .98;
-    letter-spacing: -.038em;
-    margin-top: 30px;
-    max-width: 13ch;
+    font-weight: 760;
+    line-height: .90;
+    margin-top: 26px;
+    white-space: nowrap;
   }
+  h1 .ln { display: block; letter-spacing: -.032em; }
+  h1 .ln1 { font-size: 18.38cqi; }
+  h1 .ln2 { font-size: 17.39cqi; }
   h1 em { font-style: normal; color: #1B44C8; }
-  .rule { height: 1px; background: #E4E4DE; margin-bottom: 24px; }
+
+  .rule { height: 1px; background: #E4E4DE; margin-bottom: 22px; }
   .btm { display: flex; justify-content: space-between; align-items: baseline; gap: 24px; }
-  .dom { font-size: 25px; font-weight: 500; letter-spacing: -.01em; }
+  .dom { font-size: 25px; font-weight: 600; letter-spacing: -.01em; }
   .stack {
     font-family: "Azeret Mono", ui-monospace, monospace;
     font-size: 16px;
@@ -65,7 +76,10 @@
 <body>
   <div class="top">
     <p class="eyebrow">Islam Soliman · Software engineer · Cairo</p>
-    <h1>I build every layer <em>myself</em>.</h1>
+    <h1>
+      <span class="ln ln1">I build every</span>
+      <span class="ln ln2">layer <em>myself.</em></span>
+    </h1>
   </div>
   <div>
     <div class="rule"></div>
