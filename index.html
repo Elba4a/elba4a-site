@@ -10,8 +10,8 @@
 <link rel="icon" href="/assets/img/icon-32.png?v=3" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/assets/img/icon-180.png?v=3">
 <link rel="preload" href="/assets/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/css/site.css?v=12">
-<script src="/assets/js/site.js?v=13" defer></script>
+<link rel="stylesheet" href="/assets/css/site.css?v=15">
+<script src="/assets/js/site.js?v=15" defer></script>
 <meta property="og:type" content="website">
 <meta property="og:locale" content="en_US">
 <meta property="og:title" content="Islam Soliman — Software Engineer">
@@ -28,24 +28,23 @@
 </head>
 <body>
 <!--
-THESIS: One engineer builds every layer of a product, so the page is the stack
-itself, fallen through. Refuses both the flat card portfolio and the floating-island
-3D world every WebGL portfolio ships.
-OWN-WORLD: Paper ground, near-black ink, one deep blue. Schibsted Grotesk with Azeret
-Mono on every figure. A procedural WebGL stack behind live DOM content, never inside it.
+THESIS: One engineer builds every layer of a product. The sentence says it and the
+product proves it, so the page is one huge line of type and one app you can use.
+OWN-WORLD: Paper ground, near-black ink, one deep blue, one grey band for the
+product. Archivo fitted line by line to the measure, Azeret Mono on every figure.
+No canvas, no scene, no decoration that is not evidence.
 STORY: This person builds the app, the web, the schema, the functions and the
-infrastructure alone; three of four products cannot be linked, so the openable ones
-come first and the rest are counted.
-FIRST VIEWPORT: Eyebrow, headline, one line of scope, four links that open right now,
-with the device layer of the world drifting behind. Contact sits in the header.
-FORM: Full 3D world, chosen by the user over a contained accent, wow prioritised over
-scan speed; the static page remains complete for every client that cannot render it.
+infrastructure alone; three of four products cannot be linked, so the one that can be
+handled comes first and the rest are counted.
+FIRST VIEWPORT: Eyebrow, the sentence at 218px flush on both margins, four links that
+open right now. Nothing else.
+FORM: The interactive layer is the product itself — nine real screens in a real device
+frame, walked through by the reader. The 3D that stood in for it is deleted.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->
 
 <a class="skip" href="#main">Skip to content</a>
 
-<canvas id="world" aria-hidden="true"></canvas>
 
 <header class="hdr">
   <div class="shell hdr__in">
@@ -95,61 +94,122 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
     </div>
   </section>
 
-  <!-- ------------------------------------------------------------- work -->
-  <section class="section" id="work">
-    <div class="shell">
-      <div class="s-head reveal">
-        <h2>Work</h2>
-        <p class="s-head__note">Four products. Most of the code is private because it holds client data and pricing.</p>
-      </div>
-    </div>
+  <!-- -------------------------------------------------------- prototype -->
 
-    <!-- ---------------------------------------------------------- hekta -->
-    <article class="proj shell">
-      <div class="proj__head reveal">
-        <div class="proj__title">
-          <h3>Hekta</h3>
-          <span class="tag tag--live">Pre-submission · v1.0.0</span>
-        </div>
-        <p class="proj__lede">
+  <!-- Nine real App Store captures at 1320x2868 (440x956pt at @3x), re-encoded
+       at an exact half. Uncropped: the tab bar stays because it is part of the
+       screen, and the three hotspots below are the chevrons printed in the
+       pixels of Home, going where their own labels say. Nothing here is a
+       mockup of the app; it is the app's screens, wired to be walked through. -->
+  <section class="proto" id="product" data-screen="home">
+    <div class="proto__in">
+
+      <div class="proto__say">
+        <p class="eyebrow">The product</p>
+        <h2>Hekta</h2>
+        <span class="tag tag--live">Pre-submission · v1.0.0</span>
+        <p class="proto__lede">
           A money app for Egypt and the Gulf. You write what you spent in plain language, or
           photograph the receipt, and it fills in the form. Nothing saves until you confirm it.
           It counts gold by gram and karat, which is how gold is actually bought there and what
           no off-the-shelf library does.
         </p>
-      </div>
+        <p class="proto__hint">Nine screens. Pick one, or follow the arrows on Home.</p>
 
-      <div class="gallery reveal">
-        <figure><img src="/assets/img/hekta-home.jpg?v=1" width="620" height="1347" loading="lazy" decoding="async" alt="Hekta home screen: total balance, budget health, and an instalment due in four days."><figcaption>Home</figcaption></figure>
-        <figure><img src="/assets/img/hekta-assistant.jpg?v=1" width="620" height="1347" loading="lazy" decoding="async" alt="The assistant turns a typed sentence into a proposed transaction card with amount, account, category and merchant, waiting on Apply."><figcaption>Assistant</figcaption></figure>
-        <figure><img src="/assets/img/hekta-networth.jpg?v=1" width="620" height="1347" loading="lazy" decoding="async" alt="Net worth, including gold held as an asset measured in grams and karats."><figcaption>Net worth</figcaption></figure>
-        <figure><img src="/assets/img/hekta-capture.jpg?v=1" width="620" height="1347" loading="lazy" decoding="async" alt="Receipt capture, reading a photographed receipt into a transaction."><figcaption>Capture</figcaption></figure>
-        <figure><img src="/assets/img/hekta-analytics.jpg?v=1" width="620" height="1347" loading="lazy" decoding="async" alt="Spending analytics broken down by category over time."><figcaption>Analytics</figcaption></figure>
-      </div>
 
-      <div class="proj__grid">
-        <dl class="facts reveal">
+        <div class="proto__tabs" role="tablist" aria-label="Hekta screens">
+          <button type="button" role="tab" aria-selected="true"  tabindex="0"  aria-controls="proto-screens" data-key="home"         data-cap="Home — balance, budget health, the next instalment due">Home</button>
+          <button type="button" role="tab" aria-selected="false" tabindex="-1" aria-controls="proto-screens" data-key="assistant"    data-cap="Assistant — a typed sentence becomes a transaction card, waiting on Apply">Assistant</button>
+          <button type="button" role="tab" aria-selected="false" tabindex="-1" aria-controls="proto-screens" data-key="networth"     data-cap="Net worth — crypto, gold by gram and karat, stocks">Net worth</button>
+          <button type="button" role="tab" aria-selected="false" tabindex="-1" aria-controls="proto-screens" data-key="capture"      data-cap="New transaction — the form the assistant and the camera both fill in">New transaction</button>
+          <button type="button" role="tab" aria-selected="false" tabindex="-1" aria-controls="proto-screens" data-key="installments" data-cap="Instalments — payment 2 of 6, due in four days">Instalments</button>
+          <button type="button" role="tab" aria-selected="false" tabindex="-1" aria-controls="proto-screens" data-key="analytics"    data-cap="Analytics — twelve weeks of spending, by week and by category">Analytics</button>
+          <button type="button" role="tab" aria-selected="false" tabindex="-1" aria-controls="proto-screens" data-key="budgets"      data-cap="Budgets — monthly ceilings, spent against planned">Budgets</button>
+          <button type="button" role="tab" aria-selected="false" tabindex="-1" aria-controls="proto-screens" data-key="group"        data-cap="Shared — a group trip, who owes whom, and the settlement that clears it">Shared</button>
+          <button type="button" role="tab" aria-selected="false" tabindex="-1" aria-controls="proto-screens" data-key="paywall"      data-cap="Subscription — annual and monthly, both with a free month">Subscription</button>
+        </div>
+
+        <!-- What is under the nine screens, next to the nine screens. Every
+             one of these is countable by someone who is handed the repo. -->
+        <dl class="facts">
           <div><dt>Postgres tables</dt><dd>33 <span>RLS on every one</span></dd></div>
           <div><dt>Edge Functions</dt><dd>14 <span>every sensitive call</span></dd></div>
           <div><dt>Migrations</dt><dd>83 <span>hand-written, reversible</span></dd></div>
           <div><dt>Tests</dt><dd>1700+ <span>client and edge, green</span></dd></div>
         </dl>
 
-        <div class="proj__side reveal">
-          <ul class="chips" aria-label="Stack">
-            <li>Expo SDK 56</li><li>React Native</li><li>TypeScript strict</li>
-            <li>Supabase</li><li>PostgreSQL</li><li>Deno</li><li>Claude API</li>
-          </ul>
-          <p class="proj__meta">
-            Three products in one app: daily tracking, net worth, and shared expenses. Speech
-            and receipt capture both feed the same confirm step.
-          </p>
-          <p class="proj__link">
-            <a href="https://legal.hekta.money" rel="noopener">Privacy and terms, live<span class="go"></span></a>
-          </p>
-        </div>
+        <ul class="chips" aria-label="Stack">
+          <li>Expo SDK 56</li><li>React Native</li><li>TypeScript strict</li>
+          <li>Supabase</li><li>PostgreSQL</li><li>Deno</li><li>Claude API</li>
+        </ul>
+
+        <p class="proto__meta">
+          Three products in one app: daily tracking, net worth, and shared expenses. Speech and
+          receipt capture both feed the same confirm step.
+          <a href="https://legal.hekta.money" rel="noopener">Privacy and terms, live<span class="go"></span></a>
+        </p>
       </div>
-    </article>
+
+      <figure class="phone">
+        <div class="phone__frame" id="proto-screens" role="tabpanel" aria-label="Hekta screen">
+
+          <div class="screen" data-key="home">
+            <img src="/assets/img/hekta-01-home.jpg?v=1" width="660" height="1434" decoding="async" alt="Hekta home: total balance EGP 50,560.00, this month against a projected figure, budget health at 73% for Food and Drink and 67% overall, and an instalment for an iPhone 17 Pro due in four days.">
+            <!-- The three chevrons printed on this screen, made tappable where
+                 they actually sit. Positioned in percentages of the frame, so
+                 they hold at every device size. -->
+            <button type="button" class="hot" data-to="capture"      style="--x:5%;--y:13.5%;--w:25%;--h:6.5%">Open new transaction</button>
+            <button type="button" class="hot" data-to="budgets"      style="--x:3%;--y:44.5%;--w:94%;--h:5%">Open budget health</button>
+            <button type="button" class="hot" data-to="installments" style="--x:3%;--y:73.8%;--w:94%;--h:5%">Open instalments due</button>
+          </div>
+
+          <div class="screen" data-key="assistant" hidden>
+            <img src="/assets/img/hekta-02-assistant.jpg?v=1" width="660" height="1434" loading="lazy" decoding="async" alt="The assistant: the typed line &quot;Log a 240 EGP coffee expense on CIB Checking under Food and Drink&quot; becomes a New transaction card with amount, account, category, date and merchant filled in, above Apply, Discard and Edit.">
+          </div>
+
+          <div class="screen" data-key="networth" hidden>
+            <img src="/assets/img/hekta-03-networth.jpg?v=1" width="660" height="1434" loading="lazy" decoding="async" alt="Net worth: Bitcoin, a 50 gram 21 karat gold bracelet valued in Egyptian pounds, and Apple stock, each with its own subtotal and change.">
+          </div>
+
+          <div class="screen" data-key="capture" hidden>
+            <img src="/assets/img/hekta-04-capture.jpg?v=1" width="660" height="1434" loading="lazy" decoding="async" alt="The New transaction sheet: expense or income, an amount of 350 EGP, category Groceries, account CIB Checking, a date and an optional note, above Save.">
+          </div>
+
+          <div class="screen" data-key="installments" hidden>
+            <img src="/assets/img/hekta-05-installments.jpg?v=1" width="660" height="1434" loading="lazy" decoding="async" alt="Instalments: EGP 18,000.00 remaining across one plan, an iPhone 17 Pro at payment 2 of 6, due in four days.">
+          </div>
+
+          <div class="screen" data-key="analytics" hidden>
+            <img src="/assets/img/hekta-06-analytics.jpg?v=1" width="660" height="1434" loading="lazy" decoding="async" alt="Analytics: EGP 49,576.00 spent over twelve weeks against a weekly average, a bar chart by week, and top categories led by Shopping at 23%.">
+          </div>
+
+          <div class="screen" data-key="budgets" hidden>
+            <img src="/assets/img/hekta-07-budgets.jpg?v=1" width="660" height="1434" loading="lazy" decoding="async" alt="Budgets: monthly ceilings for Total, Groceries and Food and Drink, each showing spent against planned as a proportion.">
+          </div>
+
+          <div class="screen" data-key="group" hidden>
+            <img src="/assets/img/hekta-08-group.jpg?v=1" width="660" height="1434" loading="lazy" decoding="async" alt="A shared group, Trip to Alexandria, in Egyptian pounds: your position, per-person balances, a suggested settlement, and the expenses behind it.">
+          </div>
+
+          <div class="screen" data-key="paywall" hidden>
+            <img src="/assets/img/hekta-09-paywall.jpg?v=1" width="660" height="1434" loading="lazy" decoding="async" alt="The subscription sheet: what the paid tier unlocks, an annual plan at $39.99 and a monthly at $4.99, both with a free month.">
+          </div>
+
+        </div>
+        <figcaption class="phone__cap">Home — balance, budget health, the next instalment due</figcaption>
+      </figure>
+
+    </div>
+  </section>
+
+  <!-- ------------------------------------------------------------- work -->
+  <section class="section" id="work">
+    <div class="shell">
+      <div class="s-head reveal">
+        <h2>Work</h2>
+        <p class="s-head__note">Hekta is at the top of this page. Three more below, and most of that code is private because it holds client data and pricing.</p>
+      </div>
+    </div>
 
     <!-- --------------------------------------------------------- muhrah -->
     <article class="proj proj--alt shell">
@@ -286,41 +346,39 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
   </section>
 
   <!-- ----------------------------------------------------------- layers -->
-  <!-- The part comes apart. Each row names a layer, and the plate carrying it
-       lights as you reach it. Row and plate are tied by colour and timing, not
-       by pixel position, so nothing can drift out of register at an odd
-       viewport. With the scene absent every row simply reads at full strength:
-       the finished state is the default, and the scrub only dims what is not
-       current. -->
-  <section class="band" id="layers">
-    <div class="track">
-      <div class="track__pin">
-        <div class="shell track__grid">
-          <ol class="layers">
-            <li class="layer">
-              <span class="layer__k">App</span>
-              <span class="layer__v">Expo SDK 56 · React Native · TypeScript strict</span>
-            </li>
-            <li class="layer">
-              <span class="layer__k">Web</span>
-              <span class="layer__v">Next.js App Router · static HTML and CSS</span>
-            </li>
-            <li class="layer">
-              <span class="layer__k">Edge</span>
-              <span class="layer__v">14 Edge Functions on Deno · every sensitive call</span>
-            </li>
-            <li class="layer">
-              <span class="layer__k">Data</span>
-              <span class="layer__v">33 Postgres tables · 83 migrations · RLS on every one</span>
-            </li>
-            <li class="layer">
-              <span class="layer__k">Infra</span>
-              <span class="layer__v">Docker · Caddy · Railway · Cloudflare</span>
-            </li>
-          </ol>
-          <div class="stage" data-pose="band" aria-hidden="true"></div>
-        </div>
+  <!-- Five rows, one screen, on paper. This was a 220vh pinned dark track with
+       a machined part separating inside it; the part was a metaphor standing
+       where the evidence should be, and 2.2 viewports of near-black scrolling
+       for five list items was the emptiness it was accused of. The counts read
+       better as type anyway — they are the whole payload. -->
+  <section class="section layers" id="layers">
+    <div class="shell">
+      <div class="s-head reveal">
+        <h2>Every layer</h2>
+        <p class="s-head__note">The claim at the top of the page, itemised.</p>
       </div>
+      <ol class="layers__l">
+        <li class="layer reveal">
+          <span class="layer__k">App</span>
+          <span class="layer__v">Expo SDK 56 · React Native · TypeScript strict</span>
+        </li>
+        <li class="layer reveal">
+          <span class="layer__k">Web</span>
+          <span class="layer__v">Next.js App Router · static HTML and CSS</span>
+        </li>
+        <li class="layer reveal">
+          <span class="layer__k">Edge</span>
+          <span class="layer__v">14 Edge Functions on Deno · every sensitive call</span>
+        </li>
+        <li class="layer reveal">
+          <span class="layer__k">Data</span>
+          <span class="layer__v">33 Postgres tables · 83 migrations · RLS on every one</span>
+        </li>
+        <li class="layer reveal">
+          <span class="layer__k">Infra</span>
+          <span class="layer__v">Docker · Caddy · Railway · Cloudflare</span>
+        </li>
+      </ol>
     </div>
   </section>
 
@@ -383,7 +441,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
         <div class="stack__r">
           <div class="stack__k">Web</div>
           <ul class="chips">
-            <li>Next.js App Router</li><li>React</li><li>Static HTML and CSS</li><li>WebGL</li>
+            <li>Next.js App Router</li><li>React</li><li>Static HTML and CSS</li>
           </ul>
         </div>
         <div class="stack__r">

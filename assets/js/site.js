@@ -43,58 +43,77 @@
     for (const section of sections) spy.observe(section);
   }
 
-  /* --------------------------------------------------------------- the 3D */
+  /* ------------------------------------------------------------ prototype */
 
-  /* The scene is 183KB gzipped of Three.js plus five textures. That is a real
-     cost, so it is only paid by a client that can actually use it. Every check
-     below runs BEFORE the dynamic import, never after: a client that fails one
-     never requests the library at all. */
+  /* The phone is a real tablist over nine real screens. Every screen ships in
+     the markup and every one is reachable with the keyboard before this file
+     runs — all this adds is that only one is shown at a time. Blocked, the
+     reader gets nine screens stacked down the page, which is worse but never
+     broken.
 
-  const canvas = document.getElementById('world');
-  if (!canvas) return;
+     Nothing here claims to be the running app. The screens are the app's own
+     App Store captures at their native 1320x2868, and the walkthrough follows
+     the affordances printed in the pixels: the three chevrons on Home go where
+     their own labels say they go. */
 
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduced) return;
+  const proto = document.querySelector('.proto');
+  if (!proto) return;
 
-  /* Respect an explicit data-saving preference. */
-  const conn = navigator.connection;
-  if (conn && (conn.saveData || /^(slow-)?2g$/.test(conn.effectiveType || ''))) return;
+  const tabs = [...proto.querySelectorAll('[role="tab"]')];
+  const screens = [...proto.querySelectorAll('.screen')];
+  const caption = proto.querySelector('.phone__cap');
+  if (!tabs.length || tabs.length !== screens.length) return;
 
-  /* Probe for a real WebGL context, then throw it away. `getContext` is the
-     only honest test — a `WebGLRenderingContext` in `window` says nothing about
-     whether the machine will actually give you one.
+  /* Only now is one-at-a-time true, so only now may the rest hide. Setting
+     this in the stylesheet would leave eight screens invisible and unreachable
+     on any client where this script does not run. */
+  proto.classList.add('proto--live');
 
-     `webgl2` ONLY. three r185 asks for `"webgl2"` and throws if it cannot have
-     it; there is no WebGL1 path. Falling back to `getContext('webgl')` here
-     let a WebGL1-only client pass the gate, download the whole library, and
-     then throw inside the import. */
-  const probe = document.createElement('canvas');
-  const gl = probe.getContext('webgl2');
-  if (!gl) return;
-  const lose = gl.getExtension('WEBGL_lose_context');
-  if (lose) lose.loseContext();
+  let active = Math.max(0, tabs.findIndex((t) => t.getAttribute('aria-selected') === 'true'));
 
-  /* No narrow-viewport skip and no reduced tier. The scene now paints only
-     inside `.stage` rectangles, so a phone gets it inside its own laid-out
-     cell instead of across the lede — which is what the width check was
-     working around. Cost went down rather than up: the shaded region is a
-     rect, not the viewport. */
+  const show = (i, { focus = false } = {}) => {
+    if (i === active) return;
+    for (const [n, tab] of tabs.entries()) {
+      const on = n === i;
+      tab.setAttribute('aria-selected', String(on));
+      /* Roving tabindex: one stop for the whole strip, arrows move inside it. */
+      tab.tabIndex = on ? 0 : -1;
+      screens[n].hidden = !on;
+    }
+    /* Re-run the transition by restarting the animation on the incoming
+       screen. A class toggle would not replay without a reflow. */
+    screens[i].getAnimations().forEach((a) => { a.cancel(); a.play(); });
+    if (caption) caption.textContent = tabs[i].dataset.cap || '';
+    /* The Home-only hotspots are the printed chevrons; they mean nothing on
+       any other screen. */
+    proto.dataset.screen = tabs[i].dataset.key;
+    active = i;
+    if (focus) tabs[i].focus();
+  };
 
-  /* `?v=` on the dynamic import too. /assets/* is served `immutable`, so
-     without one an edited world.js would be served from cache forever to
-     everyone who had already loaded the page. */
-  import('./world.js?v=10')
-    .then(({ createWorld }) => {
-      const world = createWorld(canvas);
-      /* Announce only once the matcap has landed. The class makes the canvas
-         visible, and a visible canvas with no material is a grey rectangle. */
-      return world.ready.then(() => {
-        document.documentElement.classList.add('has-world');
-        window.addEventListener('pagehide', () => world.destroy(), { once: true });
-      });
-    })
-    .catch(() => {
-      /* A failed import leaves the static page exactly as it was. */
-      document.documentElement.classList.remove('has-world');
+  proto.addEventListener('click', (e) => {
+    const tab = e.target.closest('[role="tab"]');
+    if (tab) { show(tabs.indexOf(tab), { focus: true }); return; }
+    const hot = e.target.closest('.hot');
+    if (hot) show(tabs.findIndex((t) => t.dataset.key === hot.dataset.to), { focus: false });
+  });
+
+  proto.addEventListener('keydown', (e) => {
+    if (!e.target.closest('[role="tab"]')) return;
+    const last = tabs.length - 1;
+    const to = { ArrowRight: active + 1, ArrowLeft: active - 1, Home: 0, End: last }[e.key];
+    if (to === undefined) return;
+    e.preventDefault();
+    show(Math.min(last, Math.max(0, to)), { focus: true });
+  });
+
+  /* Warm the other eight after the page has settled, so the first tap is
+     instant without competing with the first screen for bandwidth. */
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(() => {
+      for (const img of proto.querySelectorAll('.screen img[loading="lazy"]')) {
+        img.loading = 'eager';
+      }
     });
+  }
 })();

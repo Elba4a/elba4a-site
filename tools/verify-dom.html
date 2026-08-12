@@ -72,28 +72,41 @@ for (const [w, h] of VP) {
   W().scrollTo(0, 0);
   await settle(160);
 
-  /* ---- 1. the .has-world toggle must change no layout and no position ---- */
-  /* #world itself is exempt: it goes display:none -> block, which is the whole
-     point. It is `position: fixed`, so its own rect can never move anything. */
-  const els = all().filter(e => e.id !== 'world');
-  const snap = () => els.map(e => {
-    const r = e.getBoundingClientRect();
-    return [Math.round(r.x), Math.round(r.y), Math.round(r.width), Math.round(r.height), cs(e).position].join('|');
-  });
-  const before = snap();
-  D().documentElement.classList.add('has-world');
-  await settle(120);
-  const after = snap();
-  const moved = els.filter((_, i) => before[i] !== after[i]).map(e => e.className || e.tagName);
-  log(moved.length === 0, `has-world moves nothing @${w}`, moved.slice(0, 4).join(','));
-
-  log(cs(D().querySelector('.hdr')).position === 'sticky', `.hdr sticky under world @${w}`,
+  /* ---- 1. the frame: sticky header, hidden skip link, contained device ----
+     This block used to toggle `.has-world` and assert the canvas moved
+     nothing. There is no canvas: the WebGL layer was deleted along with the
+     scene it drew. What survives is the pair of position assertions it was
+     really protecting, which is where the (1,1,1) specificity accident landed
+     the last time. */
+  log(cs(D().querySelector('.hdr')).position === 'sticky', `.hdr sticky @${w}`,
       cs(D().querySelector('.hdr')).position);
   const sk = D().querySelector('.skip').getBoundingClientRect();
-  log(sk.width <= 2 && sk.height <= 2, `.skip hidden under world @${w}`, `${sk.width}x${sk.height}`);
-  log(cs(D().querySelector('#world')).zIndex === '-1', `#world z-index -1 @${w}`);
-  D().documentElement.classList.remove('has-world');
-  await settle(60);
+  log(sk.width <= 2 && sk.height <= 2, `.skip hidden until focused @${w}`, `${sk.width}x${sk.height}`);
+
+  /* The device is the widest fixed-ish thing on the page and the likeliest
+     source of an overflow, so assert it inside its own column rather than
+     inferring it from the document width alone. */
+  const phone = D().querySelector('.phone');
+  const col = phone.parentElement.getBoundingClientRect();
+  const pr = phone.getBoundingClientRect();
+  log(pr.width > 0 && pr.left >= col.left - 1 && pr.right <= col.right + 1,
+      `the device stays inside its column @${w}`,
+      `${Math.round(pr.left)}..${Math.round(pr.right)} in ${Math.round(col.left)}..${Math.round(col.right)}`);
+
+  /* Nine screens, one shown. A layout that stacked them would be legible but
+     enormous, and nothing else on the page would say so. */
+  const onScreens = [...D().querySelectorAll('.proto .screen')].filter(s => !s.hidden).length;
+  log(onScreens === 1, `one screen shown at a time @${w}`, `${onScreens} visible`);
+
+  /* Every tab has to be tappable, not merely present: the strip wraps, and a
+     wrapped row that overflows its band is how a control goes missing. */
+  const tabs = [...D().querySelectorAll('.proto [role="tab"]')];
+  const small = tabs.filter(t => {
+    const r = t.getBoundingClientRect();
+    return r.width < 44 || r.height < 24;
+  });
+  log(small.length === 0, `every screen tab is a real target @${w}`,
+      small.map(t => t.textContent).join(',') || `${tabs.length} tabs`);
 
   /* ---- 2. no horizontal overflow, clip lifted so it cannot mask it ------- */
   const de = D().documentElement, prev = de.style.overflowX;

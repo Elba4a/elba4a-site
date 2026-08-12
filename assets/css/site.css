@@ -46,19 +46,20 @@
   --ink-2:   #5A5A63;
   --line:    #E4E4DE;
   --line-2:  #D2D2CA;
+  /* The one ground that is not paper. A full-bleed band bounded by a rule, not
+     a mid-page tint step: --paper against --paper-2 is 1.074:1, and a 7% step
+     across a viewport reads as a rendering error, which is what shipped once.
+     Measured against --slab, not estimated:
+     --ink 13.1:1 · --ink-2 4.7:1 (AA only) · --accent 5.4:1 (AA only).
+     So captions on the slab use --ink at a smaller size, and no link goes on
+     it — the tab pills carry their own --ink background instead. */
+  --slab:    #DCDCD4;
+  /* --ink-2 is 4.95:1 on the slab, which is AA and not the AAA the rest of the
+     page holds, so muted text on this band uses its own value: 7.44:1. */
+  --slab-ink-2: #404048;
   --accent:  #1B44C8;
   --navy:    #06244A;
   --gold:    #BFA46B;
-
-  /* The dark stage. #0B0B0D is not a taste call — it is the ground the
-     graphite matcap was proven against, and its rim survives on that specific
-     value. Ratios measured against it, not estimated:
-     --on-stage 17.4:1 · --on-stage-2 8.0:1 · --stage-accent 7.7:1
-     `--accent` #1B44C8 is 1.9:1 here and cannot be used on the stage. */
-  --stage:        #0B0B0D;
-  --on-stage:     #F4F4F0;
-  --on-stage-2:   #A6A6B0;
-  --stage-accent: #7FA0FF;
 
   --sans: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: "Azeret Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -391,6 +392,175 @@ code {
   transition: border-color .25s var(--ease);
 }
 .open__l a:hover { border-block-end-color: var(--accent); }
+
+/* ------------------------------------------------------------- prototype */
+
+/* The product, at the top of the page, as a thing you use rather than a strip
+   of thumbnails. */
+.proto {
+  padding-block: clamp(3rem, 8vh, 6rem);
+  background: var(--slab);
+  border-block: 1px solid var(--line-2);
+}
+
+.proto__in {
+  max-inline-size: var(--shell);
+  margin-inline: auto;
+  padding-inline: var(--gut);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: clamp(2rem, 5vw, 4.5rem);
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  /* The phone first: on a phone, the product is the point. */
+  .proto__in { grid-template-columns: minmax(0, 1fr); justify-items: center; }
+  .proto__say { order: 2; }
+  .phone { order: 1; }
+}
+
+.proto__say h2 { font-size: var(--fs-h2); font-weight: 500; margin-block: .5rem .5rem; }
+.proto__lede { max-inline-size: 46ch; margin-block-start: 1rem; }
+.proto__hint {
+  font-family: var(--mono);
+  font-size: var(--fs-meta);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--slab-ink-2);
+  margin-block-start: clamp(1.75rem, 4vh, 2.5rem);
+}
+
+/* Every muted token on the page is measured against --paper and lands one
+   grade lower on the slab, so the band re-points them rather than accepting AA
+   where the rest of the page holds AAA. */
+.proto .facts dt,
+.proto .facts span,
+.proto__meta { color: var(--slab-ink-2); }
+.proto .facts { border-block-start-color: var(--line-2); }
+.proto .facts > div { border-block-end-color: var(--line-2); }
+.proto .chips li { border-color: var(--line-2); background: transparent; }
+
+.proto .facts { margin-block-start: clamp(2rem, 5vh, 3rem); }
+.proto .chips { margin-block-start: 1.5rem; }
+.proto__meta {
+  margin-block-start: 1rem;
+  font-size: .875rem;
+  max-inline-size: 46ch;
+}
+.proto__meta a { white-space: nowrap; }
+
+/* The index. Nine named screens, always all nine — the phone shows one at a
+   time but the page never hides what it holds. */
+.proto__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin-block-start: .875rem;
+}
+.proto__tabs button {
+  font-family: var(--mono);
+  font-size: .78125rem;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  padding: .4375rem .8125rem;
+  cursor: pointer;
+  transition: border-color .2s var(--ease), background-color .2s var(--ease);
+}
+.proto__tabs button:hover { border-color: var(--ink); }
+.proto__tabs button[aria-selected="true"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+/* ---- the device ---------------------------------------------------------
+
+   Not a mockup: 1320x2868 is 440x956pt at @3x, so the corner radii below are
+   the device's own, expressed as a fraction of its width. No drawn notch (the
+   Dynamic Island is in the pixels), no side buttons, no angle, no reflection.
+
+   The 2px ring is what actually solves the contrast problem. The screens are
+   iOS light mode on #F2F2F7; against --paper that is 1.08:1 and invisible.
+   Against --ink it is 16.17:1, and that holds on any ground, under any
+   ambient light, whatever the palette does later. */
+.phone {
+  margin: 0;
+  inline-size: min(330px, 78vw);   /* 330 CSS px is exactly 660 source px at DPR 2 */
+  position: sticky;
+  inset-block-start: calc(60px + 1.5rem);
+  /* The container has to be the PARENT. `container-type` makes an element a
+     container for its descendants, not for itself, so `cqw` in the frame's own
+     border-radius fell through to the viewport: 12.5% of 1280px is 160px, and
+     the device rendered with a domed top. */
+  container-type: inline-size;
+}
+@media (max-width: 860px) { .phone { position: static; } }
+
+.phone__frame {
+  position: relative;
+  aspect-ratio: 660 / 1434;
+  background: var(--ink);          /* no seam in the moment before an image lands */
+  overflow: hidden;
+  border-start-start-radius: 12.5cqw;   /* 55pt of 440pt */
+  border-start-end-radius: 12.5cqw;
+  /* The bottom is NOT the device radius. Probing the largest uniform corner
+     region on all nine screens found tops safe at 58pt or more everywhere, but
+     bottoms as tight as 15pt — so a true 55pt bottom radius would clip live
+     content on four of them. 15pt of 440pt is 3.4%. */
+  border-end-start-radius: 3.4cqw;
+  border-end-end-radius: 3.4cqw;
+  box-shadow:
+    inset 0 0 0 2px var(--ink),
+    0 24px 48px -28px rgb(0 0 0 / .35);
+}
+
+.screen { position: absolute; inset: 0; }
+.screen img { inline-size: 100%; block-size: 100%; display: block; }
+
+/* Only once the script has taken over does one-at-a-time become true. Hiding
+   them in the stylesheet instead would leave eight screens unreachable on any
+   client where the script does not run. */
+.proto--live .screen[hidden] { display: none; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .proto--live .screen { animation: screen-in .18s var(--ease-out) both; }
+}
+@keyframes screen-in { from { opacity: 0; transform: translateY(6px); } }
+
+/* The three chevrons printed on Home, made tappable where they actually sit.
+   Invisible until focused or hovered: the screenshot already draws the
+   affordance, so a second one over it would be a lie about the interface. */
+.hot {
+  position: absolute;
+  inset-block-start: var(--y);
+  inset-inline-start: var(--x);
+  inline-size: var(--w);
+  block-size: var(--h);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  /* Named for a screen reader, silent to a sighted reader. */
+  color: transparent;
+  font-size: 0;
+}
+.hot:hover, .hot:focus-visible {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+.proto:not([data-screen="home"]) .hot { display: none; }
+
+.phone__cap {
+  margin-block-start: 1rem;
+  font-family: var(--mono);
+  font-size: var(--fs-meta);
+  line-height: 1.55;
+  color: var(--ink);
+  max-inline-size: 34ch;
+}
 
 /* -------------------------------------------------------------- sections */
 
@@ -842,141 +1012,45 @@ code {
   *, *::before, *::after { transition-duration: .001ms !important; }
 }
 
-/* ------------------------------------------------------------- the world */
+/* ------------------------------------------------------------ the layers */
 
-/* The canvas is a backdrop, never a container. Every word on this page lives
-   in the DOM above it, so a client that never gets a WebGL context loses the
-   scene and nothing else. It stays `display:none` until site.js has confirmed
-   the client can actually render it and adds `.has-world`. */
+/* Five rows on paper, one screen. This was a 220svb pinned dark track with a
+   machined part separating inside it, and it is gone: the part was a metaphor
+   standing where evidence should be, and 2.2 viewports of near-black scroll
+   for five list items was exactly the emptiness it was accused of. The counts
+   were always the payload, and they read better as type than as drilled holes
+   nobody can count at hero scale.
+   Gone with it: the whole WebGL layer, both matcaps, and the #world canvas. */
 
-/* z-index -1, so the canvas paints under the root background and over nothing
-   else. Content never has to be lifted above it, which matters more than it
-   sounds: the rule that did the lifting was
-   `.has-world body > :not(#world) { position: relative }`, and `:not(#world)`
-   counts as an ID selector, so it scored (1,1,1) and silently beat both
-   `.skip { position: absolute }` and `.hdr { position: sticky }` at (0,1,0).
-   That one line put a black skip-link slab in the corner, killed the sticky
-   header, and shifted the page 28px when the async import landed. At -1 the
-   rule does not need to exist. */
-#world {
-  display: none;
-  position: fixed;
-  inset: 0;
-  inline-size: 100%;
-  block-size: 100%;
-  z-index: -1;
-  pointer-events: none;
-}
-.has-world #world { display: block; }
-
-/* NOTHING ELSE MAY REFERENCE `.has-world`. The canvas is fixed and out of
-   flow, so its appearance cannot move anything, and the page must look
-   identical whether the scene loaded or not.
-
-   Gone with the old architecture, and deliberately not replaced:
-     · the 88%-opaque `.section` panels with `backdrop-filter: blur(14px)`
-     · the `.proj--alt` tint
-     · the radial paper scrim under the hero
-   All three existed to protect text from a canvas that sat behind the whole
-   page. The canvas now paints only inside `.stage` rectangles, so there is
-   nothing to protect the text from. A full-viewport backdrop blur also cost
-   more per frame on a mid-range phone than the entire scene did. */
-
-/* ------------------------------------------------------------- the stage */
-
-/* The cell the 3D is allowed to paint in. world.js reads this element's
-   rect every frame and scissors the renderer to it, which is what makes
-   "text never fights geometry" a fact about the layout rather than a
-   tuning exercise. It is empty, `aria-hidden`, and it reserves its own
-   space — so the page does not move when the scene arrives, and looks
-   deliberate when it never does. */
-.stage {
-  min-block-size: min(62svb, 30rem);
-  align-self: stretch;
-}
-
-/* Both stage rules live here, together and in this order, on purpose. The
-   mobile override first sat up with the hero — earlier in the file — so the
-   base `min-block-size` won on source order, `aspect-ratio` sized the width
-   from a 480px height, and the box came out 600px wide inside a 390px
-   viewport: 250px of horizontal overflow, invisible because `html` clips. */
-@media (max-width: 860px) {
-  .stage {
-    min-block-size: 0;
-    /* Width-driven, never height-driven. `aspect-ratio` resolves from
-       whichever axis is constrained, and in a single-column grid that has to
-       be the width or the box escapes the column. */
-    inline-size: 100%;
-    block-size: auto;
-    aspect-ratio: 5 / 4;
-  }
-}
-
-/* ------------------------------------------------------------ the band */
-
-/* Same construction as the hero: the dark ground is a z-index -2
-   pseudo-element so the canvas can paint between it and the text. Never a
-   background on the section itself. */
-.band { position: relative; color: var(--on-stage); }
-.band::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-  background: var(--stage);
-}
-
-/* A tall track with a pinned inner. Scroll through the track scrubs the part;
-   the cost is bounded at 1.2 extra viewports and nothing is scroll-jacked —
-   the page keeps moving at exactly the speed the reader is scrolling it. */
-.track { block-size: 220svb; }
-.track__pin {
-  position: sticky;
-  inset-block-start: 0;
-  block-size: 100svb;
-  display: grid;
-  align-items: center;
-}
-.track__grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: clamp(1.5rem, 4vw, 3.5rem);
-  align-items: center;
-  inline-size: 100%;
-}
-
-.layers { display: grid; gap: clamp(.875rem, 2.2vh, 1.5rem); }
+.layers__l { display: grid; }
 .layer {
   display: grid;
-  gap: .3rem;
-  padding-inline-start: 1rem;
-  border-inline-start: 2px solid rgb(255 255 255 / .14);
-  transition: color .45s var(--ease), border-color .45s var(--ease);
+  grid-template-columns: minmax(0, 7rem) minmax(0, 1fr);
+  gap: .35rem 2rem;
+  align-items: baseline;
+  padding-block: clamp(1rem, 2.4vh, 1.5rem);
+  border-block-start: 1px solid var(--line);
 }
+.layer:last-child { border-block-end: 1px solid var(--line); }
+/* The section head already draws a rule; a second one 58px below it reads as
+   an empty first row. */
+.layer:first-child { border-block-start: 0; }
+
 .layer__k {
+  font-size: clamp(1.5rem, 3.4vw, 2.25rem);
+  font-weight: 760;
+  font-stretch: 100%;
+  letter-spacing: -.02em;
+}
+.layer__v {
   font-family: var(--mono);
-  font-size: var(--fs-meta);
-  letter-spacing: .16em;
-  text-transform: uppercase;
-}
-.layer__v { font-size: clamp(1rem, 1.3vw, 1.125rem); }
-
-/* Motion is opt-IN. With no scene, every row sits at full strength and the
-   band reads as a plain list. `data-scrub` is added by world.js only once it
-   is actually driving the part, and only then does anything dim. */
-.band[data-scrub] .layer { color: var(--on-stage-2); }
-.band[data-scrub] .layer.is-on {
-  color: var(--on-stage);
-  border-inline-start-color: var(--stage-accent);
+  font-size: .875rem;
+  line-height: 1.6;
+  color: var(--ink-2);
 }
 
-@media (max-width: 860px) {
-  /* The part first, then the list under it — the same order as the hero, so
-     the page has one rhythm rather than two. */
-  .track__grid { grid-template-columns: 1fr; gap: clamp(1.25rem, 4vh, 2rem); }
-  .layers { order: 2; }
-  .track__grid .stage { order: 1; aspect-ratio: 4 / 3; }
-  .track { block-size: 200svb; }
+@media (max-width: 560px) {
+  .layer { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* ---------------------------------------------------------------- gallery */
