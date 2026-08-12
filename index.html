@@ -4,367 +4,392 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Islam Soliman — Software Engineer</title>
-<meta name="description" content="I build Arabic-first products end to end — mobile, web, backend, and the infrastructure under them. React Native · Next.js · Supabase · Claude API.">
+<meta name="description" content="Islam Soliman builds Arabic-first products in Cairo. Mobile apps, web apps, and the Postgres underneath. React Native, Next.js, Supabase, Claude API.">
 <link rel="canonical" href="https://elba4a.com/">
 <link rel="icon" href="/assets/img/favicon.svg?v=2" type="image/svg+xml">
 <link rel="icon" href="/assets/img/icon-32.png?v=2" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/assets/img/icon-180.png?v=2">
-<link rel="stylesheet" href="/assets/css/site.css?v=1">
+<link rel="preload" href="/assets/fonts/schibsted-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/css/site.css?v=2">
+<script src="/assets/js/site.js?v=1" defer></script>
 <meta property="og:type" content="website">
 <meta property="og:locale" content="en_US">
 <meta property="og:title" content="Islam Soliman — Software Engineer">
-<meta property="og:description" content="I build Arabic-first products end to end — mobile, web, backend, and the infrastructure under them.">
+<meta property="og:description" content="I build Arabic-first products in Cairo. Mobile apps, web apps, and the Postgres underneath.">
 <meta property="og:url" content="https://elba4a.com/">
 <meta property="og:site_name" content="elba4a.com">
-<meta property="og:image" content="https://elba4a.com/assets/img/og.png?v=1">
+<meta property="og:image" content="https://elba4a.com/assets/img/og.png?v=2">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Islam Soliman — I build Arabic-first products, end to end.">
+<meta property="og:image:alt" content="Islam Soliman — I build the Arabic version first.">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#0A0A0B">
+<meta name="theme-color" content="#FBFBF9">
 </head>
 <body>
+<!--
+THESIS: One engineer who builds the Arabic version first, proved by showing the same
+app screen in both directions rather than claiming it. Refuses the near-black,
+one-gold-accent, hairline-bento portfolio the category ships by default.
+OWN-WORLD: Warm paper ground, near-black ink, one deep blue. Schibsted Grotesk with
+Azeret Mono carrying every figure. Rules and generous space instead of card chrome.
+STORY: This person builds whole products alone for a market he lives in; three of them
+cannot be linked, so the openable ones are handed over early and the rest are dimensioned.
+FIRST VIEWPORT: Eyebrow, six-word headline, one line of scope, then four links that open
+right now. Contact sits in the header from the first pixel.
+FORM: Category convention at full fidelity, chosen by the user over a dealt direction;
+candidate 7 declined; seed key 8ac4c70e.
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+-->
 
 <a class="skip" href="#main">Skip to content</a>
 
 <header class="hdr">
   <div class="shell hdr__in">
-    <a class="hdr__name" href="/">Islam Soliman</a>
-    <nav class="hdr__nav" aria-label="Page sections">
-      <a class="hdr__link" href="#work">Work</a>
-      <a class="hdr__link" href="#build">How I build</a>
-      <a class="hdr__link" href="#stack">Stack</a>
-      <a class="hdr__link" href="#contact">Contact</a>
+    <a class="hdr__id" href="/">
+      <span class="hdr__mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none"><path d="M9 9v14" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"/><path d="M23 11.5c-1.3-1.7-3.2-2.5-5-2.5-2.4 0-4 1.3-4 3.1 0 4.3 9.4 2.4 9.4 7.4 0 2.4-2.1 4-5.1 4-2.2 0-4.2-.9-5.5-2.6" stroke="currentColor" stroke-width="2.2" stroke-linecap="square"/></svg>
+      </span>
+      <span>Islam Soliman</span>
+    </a>
+    <nav class="hdr__nav" aria-label="Sections">
+      <a href="#work">Work</a>
+      <a href="#approach">Approach</a>
+      <a href="#stack">Stack</a>
     </nav>
+    <a class="hdr__cta" href="#contact">Get in touch</a>
   </div>
 </header>
 
 <main id="main">
 
-  <!-- ---------------------------------------------------------- hero -->
+  <!-- ------------------------------------------------------------- hero -->
   <section class="hero">
-    <div class="shell hero__in">
-      <p class="eyebrow">Software engineer · Cairo · Remote</p>
+    <div class="shell">
+      <p class="eyebrow reveal">Software engineer · Cairo · Remote</p>
 
-      <h1>
-        <span class="line"><span>I build</span></span>
-        <span class="line"><span><em>Arabic-first</em> products,</span></span>
-        <span class="line"><span>end to end.</span></span>
+      <h1 class="hero__h">
+        <span class="line"><span>I build the</span></span>
+        <span class="line"><span>Arabic version <em>first</em>.</span></span>
       </h1>
 
       <p class="hero__sub">
-        The mobile app, the web app, the backend, and the infrastructure under them.
-        RTL is designed in from the first <code>commit</code> — not translated in at the end.
+        Mobile apps, web apps, and the Postgres underneath. I write the Arabic myself.
       </p>
 
-      <hr class="rule hero__rule">
-    </div>
-  </section>
-
-  <!-- ------------------------------------------------------- metrics -->
-  <section class="shell" aria-label="Work in numbers">
-    <div class="metrics">
-      <div class="metric reveal">
-        <span class="metric__n">800+</span>
-        <span class="metric__l">commits across 4 projects</span>
-      </div>
-      <div class="metric reveal">
-        <span class="metric__n">11</span>
-        <span class="metric__l">weeks, back to back</span>
-      </div>
-      <div class="metric reveal">
-        <span class="metric__n">33</span>
-        <span class="metric__l">Postgres tables, RLS on every one</span>
-      </div>
-      <div class="metric reveal">
-        <span class="metric__n">1700+</span>
-        <span class="metric__l">tests, all green</span>
-      </div>
-      <div class="metric reveal">
-        <span class="metric__n">14</span>
-        <span class="metric__l">Edge Functions</span>
-      </div>
-      <div class="metric reveal">
-        <span class="metric__n">14</span>
-        <span class="metric__l">languages in one product</span>
+      <div class="open">
+        <span class="open__k">Open right now</span>
+        <ul class="open__l">
+          <li><a href="https://noor-eg.net" rel="noopener">noor-eg.net</a></li>
+          <li><a href="https://github.com/Elba4a/karat-gold" rel="noopener">karat-gold</a></li>
+          <li><a href="https://github.com/Elba4a/arabic-type-rn" rel="noopener">arabic-type-rn</a></li>
+          <li><a href="https://github.com/Elba4a/elba4a-site" rel="noopener">this page's source</a></li>
+        </ul>
       </div>
     </div>
   </section>
 
-  <!-- ---------------------------------------------------------- work -->
-  <section class="shell section" id="work">
-    <div class="section__head">
-      <h2>Work</h2>
-      <hr class="rule">
+  <!-- ------------------------------------------------------------- work -->
+  <section class="section" id="work">
+    <div class="shell">
+      <div class="s-head reveal">
+        <h2>Work</h2>
+        <p class="s-head__note">Four products. Most of the code is private because it holds client data and pricing.</p>
+      </div>
     </div>
 
-    <div class="bento">
-
-      <!-- Hekta -->
-      <article class="card card--wide reveal">
-        <div class="showcase">
-          <div class="showcase__body">
-            <div class="card__top">
-              <h3>Hekta</h3>
-              <span class="card__tag card__tag--lit">Pre-submission · v1.0.0</span>
-            </div>
-            <p>
-              A personal financial operating system for the Arab world. Daily money
-              tracking, net worth with gold measured in karats and grams, and shared
-              expenses — fused under a single AI input layer: type it, say it, or scan
-              the receipt. The assistant proposes and the user confirms; nothing is
-              saved without confirmation.
-            </p>
-            <div class="chips" aria-label="Stack">
-              <span class="chip">Expo</span>
-              <span class="chip">React Native</span>
-              <span class="chip">TypeScript</span>
-              <span class="chip">Supabase</span>
-              <span class="chip">Claude API</span>
-            </div>
-            <p class="card__meta">
-              33 tables with RLS · 14 Edge Functions · 83 SQL migrations · 1,700+ tests
-            </p>
-          </div>
-
-          <div class="phones" aria-label="App screenshots">
-            <div class="phone">
-              <img src="/assets/img/hekta-01-home.jpg?v=1" width="440" height="956"
-                   loading="lazy" decoding="async" alt="Home screen — balance and the day's spending">
-            </div>
-            <div class="phone">
-              <img src="/assets/img/hekta-02-assistant.jpg?v=1" width="440" height="956"
-                   loading="lazy" decoding="async" alt="The assistant proposes a transaction parsed from a plain sentence, and the user confirms it">
-            </div>
-            <div class="phone">
-              <img src="/assets/img/hekta-03-networth.jpg?v=1" width="440" height="956"
-                   loading="lazy" decoding="async" alt="Net worth — assets including karat-aware gold">
-            </div>
-          </div>
+    <!-- ---------------------------------------------------------- hekta -->
+    <article class="proj shell">
+      <div class="proj__head reveal">
+        <div class="proj__title">
+          <h3>Hekta</h3>
+          <span class="tag tag--live">Pre-submission · v1.0.0</span>
         </div>
-      </article>
-
-      <!-- Muhrah -->
-      <article class="card reveal">
-        <div class="card__top">
-          <h3>Muhrah</h3>
-          <span class="card__tag">A brand I own</span>
-        </div>
-        <p>
-          A handmade mastic bukhoor brand in Cairo. Shopify storefront, a full design
-          system, and a WhatsApp bot that answers customers in Egyptian Arabic and
-          closes the order in the store.
+        <p class="proj__lede">
+          Hekta is a money app for Egypt and the Gulf. You write what you spent in ordinary
+          Arabic, or photograph the receipt, and it fills in the form. Nothing saves until you
+          confirm it. It counts gold by gram and karat, the way gold is actually bought here.
         </p>
-        <div class="chips" aria-label="Stack">
-          <span class="chip">Shopify Liquid</span>
-          <span class="chip">Node stdlib</span>
-          <span class="chip">WhatsApp Cloud API</span>
-          <span class="chip">Claude API</span>
-        </div>
-        <p class="card__meta">One external dependency in the whole project — the rest is the Node standard library</p>
-      </article>
+      </div>
 
-      <!-- Horus Transfer -->
-      <article class="card reveal">
-        <div class="card__top">
+      <figure class="wipe reveal" data-wipe>
+        <div class="wipe__stage">
+          <img class="wipe__base" src="/assets/img/hekta-home-en.jpg?v=1" width="660" height="1434"
+               loading="lazy" decoding="async"
+               alt="Hekta home screen in English, showing the total balance, budget health, and an instalment due in four days.">
+          <div class="wipe__over" aria-hidden="true">
+            <img src="/assets/img/hekta-home-ar.jpg?v=1" width="660" height="1434" loading="lazy" decoding="async" alt="">
+          </div>
+          <span class="wipe__seam" aria-hidden="true"><i></i></span>
+          <span class="wipe__badge wipe__badge--l" aria-hidden="true">العربية</span>
+          <span class="wipe__badge wipe__badge--r" aria-hidden="true">English</span>
+          <input class="wipe__ctl" type="range" min="0" max="100" value="52" step="0.1"
+                 aria-label="Wipe between the Arabic and English build of the Hekta home screen">
+        </div>
+        <figcaption>
+          The same screen, same build. Drag it. The layout mirrors, the chevrons turn around,
+          the progress bars fill from the other side, and the currency lands where an Arabic
+          reader expects it.
+        </figcaption>
+      </figure>
+
+      <div class="proj__grid">
+        <dl class="facts reveal">
+          <div><dt>Postgres tables</dt><dd>33 <span>RLS on every one</span></dd></div>
+          <div><dt>Edge Functions</dt><dd>14 <span>every sensitive call</span></dd></div>
+          <div><dt>Migrations</dt><dd>83 <span>hand-written, reversible</span></dd></div>
+          <!-- No thousands comma: the mono gives the comma a full character cell,
+               which reads as "1 , 700+" at display size. -->
+          <div><dt>Tests</dt><dd>1700+ <span>client and edge, green</span></dd></div>
+        </dl>
+
+        <div class="proj__side reveal">
+          <ul class="chips" aria-label="Stack">
+            <li>Expo SDK 56</li><li>React Native</li><li>TypeScript strict</li>
+            <li>Supabase</li><li>PostgreSQL</li><li>Deno</li><li>Claude API</li>
+          </ul>
+          <p class="proj__meta">
+            Three products in one app: daily tracking, net worth including karat-aware gold,
+            and shared expenses. Speech and receipt capture both feed the same confirm step.
+          </p>
+          <p class="proj__link">
+            <a href="https://legal.hekta.money" rel="noopener">Privacy and terms, live<span class="go"></span></a>
+          </p>
+        </div>
+      </div>
+    </article>
+
+    <!-- --------------------------------------------------------- muhrah -->
+    <article class="proj proj--alt shell">
+      <div class="proj__head reveal">
+        <div class="proj__title">
+          <h3>Muhrah <span class="proj__ar" lang="ar" dir="rtl">مُهرة</span></h3>
+          <span class="tag">A brand I own</span>
+        </div>
+        <p class="proj__lede">
+          A handmade bukhoor brand in Madinaty. I built the storefront, the design system, and
+          a WhatsApp bot that answers customers in Egyptian Arabic and closes the order inside
+          Shopify. The whole project carries one external dependency. Everything else is the
+          Node standard library.
+        </p>
+      </div>
+
+      <div class="proj__grid">
+        <div class="brandcard reveal">
+          <div class="brandcard__mark">
+            <img src="/assets/img/muhrah-emblem.svg?v=1" width="130" height="200" loading="lazy" decoding="async"
+                 alt="The Muhrah emblem, a gold filigree crest.">
+          </div>
+          <ul class="swatches" aria-label="Brand palette">
+            <li><i style="--c:#06244A"></i><span>#06244A</span></li>
+            <li><i style="--c:#BFA46B"></i><span>#BFA46B</span></li>
+            <li><i style="--c:#F5F1E9"></i><span>#F5F1E9</span></li>
+          </ul>
+        </div>
+
+        <div class="proj__side reveal">
+          <ul class="chips" aria-label="Stack">
+            <li>Shopify Liquid</li><li>Admin API</li><li>WhatsApp Cloud API</li>
+            <li>node:sqlite</li><li>Claude API</li><li>Railway</li>
+          </ul>
+          <p class="proj__meta">
+            The store is live behind a password page while the catalogue is finished, so there
+            is nothing worth linking yet.
+          </p>
+        </div>
+      </div>
+    </article>
+
+    <!-- ---------------------------------------------------------- horus -->
+    <article class="proj shell">
+      <div class="proj__head reveal">
+        <div class="proj__title">
           <h3>Horus Transfer</h3>
-          <span class="card__tag">Product</span>
+          <span class="tag">Built, not deployed</span>
         </div>
-        <p>
-          Fixed-price transfers in Egypt, quoted before you confirm, in fourteen
-          languages, confirmed over WhatsApp instead of email — because that is how
-          the market actually behaves, and fighting it would have added a step that
-          drops bookings.
-        </p>
-        <div class="chips" aria-label="Stack">
-          <span class="chip">Next.js</span>
-          <span class="chip">next-intl</span>
-          <span class="chip">PostgreSQL</span>
-          <span class="chip">Turnstile</span>
-        </div>
-        <p class="card__meta">14 languages · search only ever offers destinations the operator has actually priced</p>
-      </article>
-
-      <!-- karat-gold -->
-      <a class="card card--third reveal" href="https://github.com/Elba4a/karat-gold" rel="noopener">
-        <div class="card__top">
-          <h3>karat-gold</h3>
-          <span class="card__tag">Open source</span>
-        </div>
-        <p>
-          Gold weight and value in karats and grams — not troy ounces. 24K down to
-          10K, purity, and valuation. Extracted from Hekta because no library does it.
-        </p>
-        <p class="card__meta">MIT · 10 tests · zero dependencies <span class="card__go"></span></p>
-      </a>
-
-      <!-- arabic-type-rn -->
-      <a class="card card--third reveal" href="https://github.com/Elba4a/arabic-type-rn" rel="noopener">
-        <div class="card__top">
-          <h3>arabic-type-rn</h3>
-          <span class="card__tag">Open source</span>
-        </div>
-        <p>
-          Arabic text styling for React Native. Fonts loaded by PostScript name per
-          weight, and <code>letterSpacing</code> zeroed out — negative tracking breaks
-          the cursive joins.
-        </p>
-        <p class="card__meta">MIT · 12 tests · zero dependencies <span class="card__go"></span></p>
-      </a>
-
-      <!-- GitHub -->
-      <a class="card card--third reveal" href="https://github.com/Elba4a" rel="noopener">
-        <div class="card__top">
-          <h3>GitHub</h3>
-          <span class="card__tag">Profile</span>
-        </div>
-        <p>
-          Most of the work sits in private repos because it holds client data and
-          pricing. What is open lives here.
-        </p>
-        <p class="card__meta">github.com/Elba4a <span class="card__go"></span></p>
-      </a>
-
-    </div>
-  </section>
-
-  <!-- ------------------------------------------------------ principles -->
-  <section class="shell section" id="build">
-    <div class="section__head">
-      <h2>How I build</h2>
-      <hr class="rule">
-    </div>
-
-    <div class="principles reveal">
-      <div class="principle">
-        <span class="principle__n">01</span>
-        <h3>Arabic is not a translation layer</h3>
-        <p>
-          Native RTL from day one. Arabic fonts loaded by PostScript name per weight,
-          and Arabic copy written in Arabic — not translated from English.
+        <p class="proj__lede">
+          A tourist landing in Luxor has no idea what the ride into town should cost, so the
+          price gets negotiated at the curb. Horus quotes it before you book. Confirmation goes
+          to WhatsApp. There is no email field anywhere in the product.
         </p>
       </div>
-      <div class="principle">
-        <span class="principle__n">02</span>
-        <h3>Domain rules the libraries don't have</h3>
-        <p>
-          Gold in karats and grams, never ounces, because that is how it is actually
-          bought here. Every entry locked to its exchange rate on the day it was made,
-          so last year's numbers can't be rewritten.
+
+      <div class="proj__grid">
+        <div class="locales reveal" aria-label="Locales the product ships in">
+          <span lang="ar" dir="rtl">العربية</span><span>English</span><span>Deutsch</span>
+          <span>Français</span><span>Italiano</span><span>Español</span>
+          <span>Español&nbsp;(LatAm)</span><span>Nederlands</span><span>Polski</span>
+          <span lang="ru">Русский</span><span lang="uk">Українська</span>
+          <span lang="cs">Čeština</span><span>Dansk</span>
+        </div>
+
+        <div class="proj__side reveal">
+          <ul class="chips" aria-label="Stack">
+            <li>Next.js App Router</li><li>next-intl</li><li>PostgreSQL</li>
+            <li>Turnstile</li><li>Docker</li>
+          </ul>
+          <p class="proj__meta">
+            Search only ever offers a destination the operator has actually priced, so no
+            estimated fare reaches the screen. The repo is private and the site is not
+            deployed.
+          </p>
+        </div>
+      </div>
+    </article>
+
+    <!-- ----------------------------------------------------------- noor -->
+    <article class="proj proj--alt shell">
+      <div class="proj__head reveal">
+        <div class="proj__title">
+          <h3>NOOR</h3>
+          <span class="tag tag--live">Live</span>
+        </div>
+        <p class="proj__lede">
+          A landing page for an Egyptian finishing contractor. Arabic is the default direction
+          and English lives under a subpath. The building in the hero is drawn rather than
+          photographed, a gold wireframe that assembles itself line by line.
         </p>
       </div>
-      <div class="principle">
-        <span class="principle__n">03</span>
-        <h3>Decisions get measured, not guessed</h3>
-        <p>
-          This accent measures 9.9:1 on the dark surface and 2.0:1 on white — which is
-          why every surface on this page is dark. The 3D library was rejected on a
-          number: 544KB gzipped before the scene itself.
+
+      <div class="proj__grid">
+        <p class="proj__link proj__link--big reveal">
+          <a href="https://noor-eg.net" rel="noopener">noor-eg.net<span class="go"></span></a>
+          <a href="https://github.com/Elba4a/noor-eg" rel="noopener">Read the source<span class="go"></span></a>
         </p>
+        <div class="proj__side reveal">
+          <ul class="chips" aria-label="Stack">
+            <li>Static HTML</li><li>CSS</li><li>Caddy</li><li>Docker</li><li>Railway</li>
+          </ul>
+          <p class="proj__meta">
+            Four moments of motion in the whole page, counted and budgeted. Static files on
+            Caddy with no backend behind them.
+          </p>
+        </div>
       </div>
-      <div class="principle">
-        <span class="principle__n">04</span>
-        <h3>Secrets stay on the server</h3>
-        <p>
-          No API key ever ships in a client bundle. Sensitive calls all run from Edge
-          Functions, and the anon key has never seen a key.
-        </p>
+    </article>
+
+    <!-- ---------------------------------------------------- open source -->
+    <div class="shell">
+      <div class="oss">
+        <a class="oss__c reveal" href="https://github.com/Elba4a/karat-gold" rel="noopener">
+          <h3>karat-gold<span class="go"></span></h3>
+          <p>
+            Gold weight and value in karats and grams, 24K down to 10K. Pulled out of Hekta
+            because no library does it.
+          </p>
+          <span class="oss__m">MIT · 10 tests · zero dependencies</span>
+        </a>
+        <a class="oss__c reveal" href="https://github.com/Elba4a/arabic-type-rn" rel="noopener">
+          <h3>arabic-type-rn<span class="go"></span></h3>
+          <p>
+            Arabic text styling for React Native. Fonts load by PostScript name per weight, and
+            <code>letterSpacing</code> is zeroed, because negative tracking breaks the joins
+            between letters.
+          </p>
+          <span class="oss__m">MIT · 12 tests · zero dependencies</span>
+        </a>
       </div>
     </div>
   </section>
 
-  <!-- --------------------------------------------------------- stack -->
-  <section class="shell section" id="stack">
-    <div class="section__head">
-      <h2>Stack</h2>
-      <hr class="rule">
-    </div>
+  <!-- --------------------------------------------------------- approach -->
+  <section class="section" id="approach">
+    <div class="shell">
+      <div class="s-head reveal">
+        <h2>Approach</h2>
+      </div>
 
-    <div class="stack reveal">
-      <div class="stack__row">
-        <div class="stack__k">Mobile</div>
-        <div class="chips">
-          <span class="chip">Expo SDK 56</span>
-          <span class="chip">React Native</span>
-          <span class="chip">TypeScript strict</span>
-          <span class="chip">Expo Router</span>
-          <span class="chip">Reanimated</span>
-          <span class="chip">EAS Build</span>
-        </div>
+      <div class="appr">
+        <article class="appr__i reveal">
+          <h3>I audit my own work before anyone else gets to</h3>
+          <p>
+            A pre-launch pass over Hekta turned up five problems the documentation already
+            claimed were finished. Deleting an account never revoked the Apple token. Free
+            quota counters never reset. All five are closed, and that pass is the reason the
+            app is still pre-submission instead of on the store.
+          </p>
+        </article>
+        <article class="appr__i reveal">
+          <h3>The whole stack is mine, so nothing waits on anyone</h3>
+          <p>
+            The app, the web front end, the schema, the migrations, the Edge Functions, the
+            DNS, and the container it ships in. When the database needs a column, I add it in
+            the same afternoon the screen needs it.
+          </p>
+        </article>
+        <article class="appr__i reveal">
+          <h3>Secrets never reach a client bundle</h3>
+          <p>
+            Every sensitive call runs server side from an Edge Function. The anonymous key that
+            ships in the app has never had access to anything a stranger could spend.
+          </p>
+        </article>
       </div>
-      <div class="stack__row">
-        <div class="stack__k">Web</div>
-        <div class="chips">
-          <span class="chip">Next.js App Router</span>
-          <span class="chip">next-intl</span>
-          <span class="chip">React</span>
-          <span class="chip">Vite</span>
-          <span class="chip">Static HTML/CSS, no build</span>
-        </div>
+    </div>
+  </section>
+
+  <!-- ------------------------------------------------------------ stack -->
+  <section class="section" id="stack">
+    <div class="shell">
+      <div class="s-head reveal">
+        <h2>Stack</h2>
+        <p class="s-head__note">Everything here is running in something above.</p>
       </div>
-      <div class="stack__row">
-        <div class="stack__k">Backend &amp; data</div>
-        <div class="chips">
-          <span class="chip">Supabase</span>
-          <span class="chip">PostgreSQL</span>
-          <span class="chip">PLpgSQL</span>
-          <span class="chip">Row-Level Security</span>
-          <span class="chip">Edge Functions / Deno</span>
-          <span class="chip">node:sqlite</span>
+
+      <div class="stack">
+        <div class="stack__r reveal">
+          <div class="stack__k">Mobile</div>
+          <ul class="chips">
+            <li>Expo SDK 56</li><li>React Native</li><li>TypeScript strict</li>
+            <li>Expo Router</li><li>Reanimated</li><li>EAS Build</li><li>Maestro</li>
+          </ul>
         </div>
-      </div>
-      <div class="stack__row">
-        <div class="stack__k">AI</div>
-        <div class="chips">
-          <span class="chip">Claude API</span>
-          <span class="chip">Tool use</span>
-          <span class="chip">Prompt caching</span>
-          <span class="chip">Speech-to-text</span>
-          <span class="chip">Evals</span>
+        <div class="stack__r reveal">
+          <div class="stack__k">Web</div>
+          <ul class="chips">
+            <li>Next.js App Router</li><li>next-intl</li><li>React</li>
+            <li>Static HTML and CSS</li>
+          </ul>
         </div>
-      </div>
-      <div class="stack__row">
-        <div class="stack__k">Infra &amp; ops</div>
-        <div class="chips">
-          <span class="chip">Railway</span>
-          <span class="chip">Vercel</span>
-          <span class="chip">Cloudflare</span>
-          <span class="chip">Docker</span>
-          <span class="chip">Caddy</span>
-          <span class="chip">Shopify</span>
-          <span class="chip">GitHub Actions</span>
-          <span class="chip">Sentry</span>
+        <div class="stack__r reveal">
+          <div class="stack__k">Backend and data</div>
+          <ul class="chips">
+            <li>Supabase</li><li>PostgreSQL</li><li>PLpgSQL</li>
+            <li>Row-Level Security</li><li>Edge Functions</li><li>Deno</li><li>node:sqlite</li>
+          </ul>
         </div>
-      </div>
-      <div class="stack__row">
-        <div class="stack__k">Quality</div>
-        <div class="chips">
-          <span class="chip">Jest</span>
-          <span class="chip">Deno test</span>
-          <span class="chip">Maestro E2E</span>
-          <span class="chip">ESLint</span>
-          <span class="chip">tsc --noEmit</span>
+        <div class="stack__r reveal">
+          <div class="stack__k">AI in the product</div>
+          <ul class="chips">
+            <li>Claude API</li><li>Tool use</li><li>Speech to text</li>
+          </ul>
+        </div>
+        <div class="stack__r reveal">
+          <div class="stack__k">Infrastructure</div>
+          <ul class="chips">
+            <li>Railway</li><li>Cloudflare</li><li>Docker</li><li>Caddy</li>
+            <li>Shopify</li><li>GitHub Actions</li><li>Sentry</li>
+          </ul>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ------------------------------------------------------- contact -->
-  <section class="shell contact" id="contact">
-    <h2>If there's something worth building, start here.</h2>
-    <p>
-      The two fastest ways to reach me. The work speaks better than any résumé does.
-    </p>
-    <div class="links">
-      <a class="link" href="https://www.linkedin.com/in/islam-soliman-594622406" rel="noopener">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05a3.74 3.74 0 0 1 3.37-1.85c3.6 0 4.27 2.37 4.27 5.46zM5.34 7.43a2.07 2.07 0 1 1 0-4.13 2.07 2.07 0 0 1 0 4.13M7.12 20.45H3.55V9h3.57zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0"/></svg>
-        <span>LinkedIn</span>
-      </a>
-      <a class="link" href="https://github.com/Elba4a" rel="noopener">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 0-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3"/></svg>
-        <span>GitHub</span>
-      </a>
+  <!-- ---------------------------------------------------------- contact -->
+  <section class="section contact" id="contact">
+    <div class="shell">
+      <h2 class="reveal">Contact</h2>
+      <p class="contact__l reveal">Cairo, working remote, in Arabic or English.</p>
+      <ul class="links">
+        <li class="reveal"><a href="mailto:admin@elba4a.com">
+          <span class="links__k">Email</span><span class="links__v">admin@elba4a.com</span></a></li>
+        <li class="reveal"><a href="https://wa.me/201096511555" rel="noopener">
+          <span class="links__k">WhatsApp</span><span class="links__v">+20 109 651 1555</span></a></li>
+        <li class="reveal"><a href="https://www.linkedin.com/in/islam-soliman-594622406" rel="noopener">
+          <span class="links__k">LinkedIn</span><span class="links__v">islam-soliman</span></a></li>
+        <li class="reveal"><a href="https://github.com/Elba4a" rel="noopener">
+          <span class="links__k">GitHub</span><span class="links__v">Elba4a</span></a></li>
+      </ul>
     </div>
   </section>
 
@@ -373,7 +398,7 @@
 <footer class="ftr">
   <div class="shell ftr__in">
     <span>© 2026 Islam Soliman · Cairo</span>
-    <span class="ftr__note">No build step · no dependencies · no external fonts · one CSS file</span>
+    <a href="https://github.com/Elba4a/elba4a-site" rel="noopener">Source</a>
   </div>
 </footer>
 

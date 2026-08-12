@@ -1,2 +1,7 @@
 .DS_Store
 .claude/
+# Design working notes. This repo is public; these carry local filesystem paths
+# and unpublished project framing, so they stay on disk and out of git.
+PRODUCT.md
+DESIGN.md
+.impeccable/
