@@ -1,0 +1,128 @@
+<!doctype html><meta charset="utf-8"><title>phase-a probe</title>
+<style>html,body{margin:0}iframe{border:0;display:block}pre{font:12px ui-monospace}</style>
+<iframe id="f" src="/index.html" width="1280" height="900"></iframe>
+<pre id="out"></pre>
+<script type="module">
+const out = document.getElementById('out');
+let pass = 0, fail = 0;
+const log = (ok, name, detail = '') => {
+  ok ? pass++ : fail++;
+  out.append((ok ? 'OK   ' : 'FAIL ') + name + (detail ? ' :: ' + detail : '') + '\n');
+};
+const caught = d => out.append('CANARY-CAUGHT ' + d + '\n');
+
+const f = document.getElementById('f');
+const load = () => new Promise(r => f.addEventListener('load', r, { once: true }));
+const settle = (ms = 120) => new Promise(r => setTimeout(r, ms));
+const D = () => f.contentDocument, W = () => f.contentWindow;
+const all = () => [...D().querySelectorAll('*')];
+const cs = el => W().getComputedStyle(el);
+const csp = (el, p) => W().getComputedStyle(el, p);
+
+await load();
+
+/* ---- canaries: prove the detectors fire before any PASS is believable ---- */
+{
+  const c = D().createElement('div');
+  /* block-size is load-bearing: a zero-height box contributes no scrollable
+     overflow area, so a canary without it silently fails to arm. */
+  c.style.cssText = 'opacity:.5;inline-size:120%;block-size:10px;position:relative';
+  D().body.appendChild(c);
+  if (+cs(c).opacity > .01 && +cs(c).opacity < .99) caught('opacity');
+  const de = D().documentElement, prev = de.style.overflowX;
+  de.style.overflowX = 'visible';
+  if (de.scrollWidth > de.clientWidth) caught('overflow');
+  de.style.overflowX = prev;
+  c.remove();
+  const a = D().querySelector('.hdr');
+  const keep = a.style.position; a.style.position = 'static';
+  if (cs(a).position !== 'sticky') caught('position');
+  a.style.position = keep;
+}
+
+const VP = [[360,780],[390,844],[620,900],[621,900],[768,1024],[1280,900],[1920,1080]];
+
+for (const [w, h] of VP) {
+  f.width = w; f.height = h;
+  W().scrollTo(0, 0);
+  await settle(160);
+
+  /* ---- 1. the .has-world toggle must change no layout and no position ---- */
+  /* #world itself is exempt: it goes display:none -> block, which is the whole
+     point. It is `position: fixed`, so its own rect can never move anything. */
+  const els = all().filter(e => e.id !== 'world');
+  const snap = () => els.map(e => {
+    const r = e.getBoundingClientRect();
+    return [Math.round(r.x), Math.round(r.y), Math.round(r.width), Math.round(r.height), cs(e).position].join('|');
+  });
+  const before = snap();
+  D().documentElement.classList.add('has-world');
+  await settle(120);
+  const after = snap();
+  const moved = els.filter((_, i) => before[i] !== after[i]).map(e => e.className || e.tagName);
+  log(moved.length === 0, `has-world moves nothing @${w}`, moved.slice(0, 4).join(','));
+
+  log(cs(D().querySelector('.hdr')).position === 'sticky', `.hdr sticky under world @${w}`,
+      cs(D().querySelector('.hdr')).position);
+  const sk = D().querySelector('.skip').getBoundingClientRect();
+  log(sk.width <= 2 && sk.height <= 2, `.skip hidden under world @${w}`, `${sk.width}x${sk.height}`);
+  log(cs(D().querySelector('#world')).zIndex === '-1', `#world z-index -1 @${w}`);
+  D().documentElement.classList.remove('has-world');
+  await settle(60);
+
+  /* ---- 2. no horizontal overflow, clip lifted so it cannot mask it ------- */
+  const de = D().documentElement, prev = de.style.overflowX;
+  de.style.overflowX = 'visible';
+  log(de.scrollWidth === de.clientWidth, `scrollWidth === clientWidth @${w}`,
+      `${de.scrollWidth} vs ${de.clientWidth}`);
+  de.style.overflowX = prev;
+
+  /* ---- 3. nav reachable at every width ---------------------------------- */
+  const nav = D().querySelector('.hdr__nav');
+  log(cs(nav).display !== 'none' && nav.getBoundingClientRect().width > 0,
+      `nav present @${w}`, cs(nav).display);
+
+  /* ---- 4. nothing at rest is half-faded --------------------------------- */
+  W().scrollTo(0, D().body.scrollHeight); await settle(420);
+  W().scrollTo(0, 0);                     await settle(220);
+  W().scrollTo(0, D().body.scrollHeight); await settle(420);
+  const half = all().filter(e => { const o = +cs(e).opacity; return o > .01 && o < .99; })
+                    .map(e => (e.className || e.tagName) + '=' + (+cs(e).opacity).toFixed(4));
+  log(half.length === 0, `nothing at rest in opacity (0.01,0.99) @${w}`, half.slice(0, 4).join(','));
+
+  const stub = [...D().querySelectorAll('.s-head')].filter(s => {
+    const t = csp(s, '::after').transform;
+    if (!t || t === 'none') return false;
+    const m = new DOMMatrixReadOnly(t);
+    return m.a > 0.01 && m.a < 0.99;
+  });
+  log(stub.length === 0, `no section rule frozen part-drawn @${w}`, `${stub.length} stubs`);
+  W().scrollTo(0, 0); await settle(120);
+}
+
+/* ---- 5. block alignment: .proj--alt must not hang left ------------------- */
+for (const w of [1216, 1280, 1440, 1920]) {
+  f.width = w; await settle(180);
+  const plain = D().querySelector('.proj:not(.proj--alt) .proj__title h3').getBoundingClientRect().x;
+  const alt   = D().querySelector('.proj--alt .proj__title h3').getBoundingClientRect().x;
+  log(Math.abs(plain - alt) < 1, `.proj--alt aligns with .proj @${w}`, `${plain} vs ${alt}`);
+}
+
+/* ---- 6. hierarchy + the tabular-nums comma ------------------------------ */
+f.width = 1280; await settle(180);
+const h2 = parseFloat(cs(D().querySelector('.s-head h2')).fontSize);
+const h3 = parseFloat(cs(D().querySelector('.proj__title h3')).fontSize);
+log(h2 > h3, 'section h2 larger than project h3', `${h2} vs ${h3}`);
+
+const capt = D().querySelector('.facts dd span');
+log(cs(capt).fontVariantNumeric !== 'tabular-nums', 'caption is not tabular-nums',
+    cs(capt).fontVariantNumeric);
+
+/* ---- 7. every swatch chip is mounted so it reads on its card ------------ */
+for (const i of D().querySelectorAll('.swatches i')) {
+  const sh = cs(i).boxShadow;
+  log(/245,\s*241,\s*233/.test(sh), 'swatch has an ivory mount', sh.slice(0, 44));
+}
+
+out.append(`HARNESS-END pass=${pass} fail=${fail}\n`);
+</script>

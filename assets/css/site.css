@@ -47,7 +47,10 @@
   --rhythm: clamp(5rem, 12vh, 9rem);
 
   --fs-display: clamp(2.75rem, 8vw, 5.75rem);
-  --fs-h2:      clamp(1.5rem, 3.2vw, 2.125rem);
+  /* Must stay above the project titles at every viewport. It used to cap at
+     34px against their 40px, so "Work" read as subordinate to "Hekta" and the
+     whole page hierarchy inverted. */
+  --fs-h2:      clamp(2.125rem, 4.6vw, 3.125rem);
   --fs-h3:      clamp(1.1875rem, 1.8vw, 1.4375rem);
   --fs-body:    1.0625rem;
   --fs-meta:    .6875rem;
@@ -118,17 +121,35 @@ code {
   padding-inline: var(--gut);
 }
 
+/* Hidden by size and clip, never by an offset. The old version parked itself
+   at `inset-block-start: -100%`, which resolves against the containing block's
+   height — so the moment anything forced it to `position: relative`, -100% of
+   an auto height became 0 and a black box appeared at the page origin. Size
+   plus `clip-path` is position-independent: force `position: static` on this
+   and the worst you get is a 1px sliver. */
 .skip {
-  position: absolute;
-  inset-block-start: -100%;
-  inset-inline-start: var(--gut);
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline-start: 0;
   z-index: 30;
-  padding: .6rem 1rem;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
   background: var(--ink);
   color: var(--paper);
   font-size: .875rem;
 }
-.skip:focus { inset-block-start: .75rem; }
+.skip:focus {
+  inline-size: auto;
+  block-size: auto;
+  overflow: visible;
+  clip-path: none;
+  margin: .75rem;
+  padding: .6rem 1rem;
+}
 
 /* Arrow points along the reading direction in both scripts. */
 .go::after { content: "\2197"; margin-inline-start: .35em; font-size: .85em; }
@@ -213,7 +234,14 @@ code {
 
 /* ------------------------------------------------------------------ hero */
 
-.hero { padding-block: clamp(4.5rem, 15vh, 9rem) clamp(3rem, 8vh, 5rem); }
+/* Positioned unconditionally, so `.has-world` never touches `position` on
+   anything. It only needs to be a containing block for the scrim below, and a
+   world-conditional position rule is exactly the shape of the bug that put a
+   black slab in the page corner. */
+.hero {
+  position: relative;
+  padding-block: clamp(4.5rem, 15vh, 9rem) clamp(3rem, 8vh, 5rem);
+}
 
 .hero__h {
   font-size: var(--fs-display);
@@ -307,8 +335,14 @@ code {
   max-width: none;
   padding-inline: var(--gut);
 }
+/* `--shell` minus both gutters, not `--shell`. `.proj--alt` drops the shell's
+   max-width and applies `--gut` as padding itself, so a child capped at the
+   full shell width re-centres inside an already-inset box and double-counts
+   the gutter — which hung Muhrah and NOOR 48px left of every other block
+   above 1216px. This caps the child at the shell's *content* width instead,
+   so its edges land exactly where a plain `.shell` section's do. */
 .proj--alt > * {
-  max-width: var(--shell);
+  max-width: calc(var(--shell) - var(--gut) * 2);
   margin-inline: auto;
 }
 .proj--alt + .proj { border-block-start: 0; }
@@ -421,6 +455,10 @@ code {
 .facts dd span {
   display: block;
   font-family: var(--sans);
+  /* `tabular-nums` is inherited from `.facts dd` and gives the comma a full
+     digit cell, so "hand-written, reversible" rendered as
+     "hand-written , reversible". The caption is prose, not a figure. */
+  font-variant-numeric: normal;
   font-size: .8125rem;
   letter-spacing: 0;
   color: var(--ink-2);
@@ -437,16 +475,19 @@ code {
   border-radius: 14px;
 }
 .brandcard__mark img { block-size: clamp(120px, 18vw, 168px); inline-size: auto; }
-.swatches { display: grid; gap: .625rem; }
-.swatches li { display: flex; align-items: center; gap: .6rem; }
-/* The navy chip sits on a navy card, so the ring is what makes it a chip at
-   all rather than a hole. It has to read on every swatch, dark and light. */
+.swatches { display: grid; gap: .875rem; }
+.swatches li { display: flex; align-items: center; gap: .9rem; }
+/* Every chip is mounted on an ivory plate, the way a real paint chip is. A
+   1px inner ring was not enough: the first swatch is #06244A on a #06244A
+   card, so all that rendered was the ring and the palette read as
+   empty box / gold box / white box. The mount is what makes a colour equal to
+   its ground still legible as a sample. */
 .swatches i {
-  inline-size: 22px;
-  block-size: 22px;
+  inline-size: 24px;
+  block-size: 24px;
   border-radius: 5px;
   background: var(--c);
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / .34);
+  box-shadow: 0 0 0 3px #F5F1E9, 0 0 0 4px rgb(0 0 0 / .22);
 }
 .swatches span {
   font-family: var(--mono);
@@ -624,10 +665,18 @@ code {
 
 @supports (animation-timeline: view()) {
  @media (prefers-reduced-motion: no-preference) {
+  /* `entry`, never `cover`. A `cover` range is `element height + viewport
+     height` long, so an element near the end of the document never has that
+     much scroll left and its progress parks partway — permanently. That is
+     what left panels sitting at opacity 0.4987 and section rules frozen
+     half-drawn, both at rest, both reading as bugs rather than motion.
+     `entry` is bounded by `min(element height, viewport height)`, and ending
+     at 55% leaves the rest of the range as slack so the last element before
+     the footer still finishes. */
   .reveal {
     animation: reveal-up linear both;
     animation-timeline: view();
-    animation-range: entry 4% cover 26%;
+    animation-range: entry 0% entry 55%;
   }
 
   /* The section rule draws itself along the reading direction. This lives on a
@@ -636,7 +685,7 @@ code {
   .s-head::after {
     animation: draw linear both;
     animation-timeline: view();
-    animation-range: entry 10% cover 34%;
+    animation-range: entry 10% entry 65%;
   }
 
  }
@@ -661,11 +710,23 @@ code {
 }
 
 @media (max-width: 620px) {
-  .hdr__nav { display: none; }
+  /* The nav used to be `display: none` here with nothing replacing it, which
+     left Work / Approach / Stack reachable only by scrolling 8,600px. The CTA
+     goes instead — Contact is the last section and the nav still reaches it. */
+  .hdr__cta { display: none; }
+  .hdr__nav { gap: 1.125rem; }
+  .hdr__nav a { font-size: .8125rem; }
   .hdr__id { margin-inline-end: auto; }
   .facts { grid-template-columns: 1fr; }
   .brandcard { flex-direction: column; align-items: flex-start; }
   .s-head { flex-direction: column; gap: .5rem; }
+}
+
+/* Below this the name and three nav items stop fitting on one line together. */
+@media (max-width: 430px) {
+  .hdr__in { gap: .875rem; }
+  .hdr__nav { gap: .875rem; }
+  .hdr__nav a { font-size: .75rem; }
 }
 
 /* --------------------------------------------------------- reduced motion */
@@ -685,20 +746,25 @@ code {
    scene and nothing else. It stays `display:none` until site.js has confirmed
    the client can actually render it and adds `.has-world`. */
 
+/* z-index -1, so the canvas paints under the root background and over nothing
+   else. Content never has to be lifted above it, which matters more than it
+   sounds: the rule that did the lifting was
+   `.has-world body > :not(#world) { position: relative }`, and `:not(#world)`
+   counts as an ID selector, so it scored (1,1,1) and silently beat both
+   `.skip { position: absolute }` and `.hdr { position: sticky }` at (0,1,0).
+   That one line put a black skip-link slab in the corner, killed the sticky
+   header, and shifted the page 28px when the async import landed. At -1 the
+   rule does not need to exist. */
 #world {
   display: none;
   position: fixed;
   inset: 0;
   inline-size: 100%;
   block-size: 100%;
-  z-index: 0;
+  z-index: -1;
   pointer-events: none;
 }
 .has-world #world { display: block; }
-
-/* Only lift the content out of the stacking context when there is something
-   behind it to lift away from. */
-.has-world body > :not(#world) { position: relative; z-index: 1; }
 .has-world body { background: transparent; }
 
 /* Text over a moving scene needs its own ground or it becomes unreadable the
@@ -784,7 +850,6 @@ code {
 /* A soft paper scrim under the reading column. The scene is deliberately kept
    out of the centre, but a bright instance can still drift close enough to
    fight the headline, and the headline has to win every time. */
-.has-world .hero { position: relative; }
 .has-world .hero::before {
   content: "";
   position: absolute;

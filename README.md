@@ -15,9 +15,36 @@ assets/js/vendor/     Three.js r0.185.1, MIT, vendored (two ESM files)
 assets/fonts/         two variable .woff2 subsets, self-hosted
 assets/img/           five app screens, the Muhrah emblem, a social card, an SVG favicon
 tools/og.html         source for the social card (not shipped)
+tools/cdp.mjs         DevTools-protocol driver, Node stdlib only (not shipped)
+tools/check-scene.mjs pixel assertions on the 3D layer (not shipped)
+tools/verify-dom.html DOM assertions across seven viewports (not shipped)
 Caddyfile             static file server, Railway's $PORT
 Dockerfile            caddy:2-alpine, explicit COPY per path
 ```
+
+Nothing under `tools/` reaches the web root — the Dockerfile copies `index.html` and
+`assets/` explicitly, never `COPY .`.
+
+## Verify it
+
+```bash
+node tools/check-scene.mjs http://localhost:8145
+```
+
+Then open `http://localhost:8145/tools/verify-dom.html` and read the `<pre>`.
+
+**Both of the designs this replaced passed with zero console errors and zero failed
+requests.** Every defect they shipped was visual-only, so both harnesses assert on pixels
+and computed styles and neither one looks at the console. Each carries canaries that must
+*report catching* a deliberately broken element before any PASS counts — a detector that
+has never fired is indistinguishable from a detector that cannot fire.
+
+Two traps that make a run pass while proving nothing, both already hit once here:
+`--enable-unsafe-swiftshader` is mandatory on Chrome 151 or headless has no WebGL context,
+the gate correctly declines, and every visual assertion passes against a static page. And
+**macOS has no `timeout` binary** — a previous pass wrapped Chrome in it with stderr
+discarded, so Chrome never launched and the run "passed" with zero checks. `cdp.mjs` bounds
+every wait in JavaScript instead.
 
 ## Run it
 
@@ -64,8 +91,48 @@ exactly this reason. An earlier version animated both and the headings rendered 
 **The 3D layer is optional, and the gate runs before the import.** `site.js` checks for
 reduced motion, a data-saving preference, and a real WebGL context *before* it dynamically
 imports `world.js`. A client that fails any check never requests Three.js at all — verified,
-not assumed: with `--disable-gpu` the server log shows the page and `site.js` fetched and
-`world.js` and `three.*` never requested. Keep every new check on that side of the import.
+not assumed, with a positive control: on a normal client the log shows `world.js` once and
+`three.*` twice; with `--disable-gpu --disable-webgl` and again with
+`--force-prefers-reduced-motion`, both are zero while the page and `site.js` still load.
+The zeros only mean something because the normal run is non-zero. Keep every new check on
+that side of the import.
+
+**The probe asks for `webgl2` and nothing else.** three r185 requests `"webgl2"` and throws
+if it cannot have it — there is no WebGL1 path. An earlier gate fell back to
+`getContext('webgl')`, so a WebGL1-only client passed, downloaded the whole library, and
+then threw inside the import.
+
+**`.has-world` may not touch `position`, `z-index` or layout.** The canvas is
+`z-index: -1` unconditionally, so content never needs lifting above it. The rule that used
+to do the lifting was `.has-world body > :not(#world) { position: relative }`, and
+`:not(#world)` counts as an **ID** selector — it scored (1,1,1) and silently beat both
+`.skip { position: absolute }` and `.hdr { position: sticky }` at (0,1,0). One line put a
+black skip-link slab in the page corner, killed the sticky header, and shifted the page
+28px when the async import landed.
+
+**The skip link hides by size and `clip-path`, never by an offset.** `inset-block-start:
+-100%` resolves against the containing block's height, so anything that forces
+`position: relative` turns it into a visible black box at the page origin.
+
+**Scroll-driven ranges use `entry`, never `cover`.** A `cover` range is *element height +
+viewport height* long, so an element near the end of the document never has that much
+scroll left and its progress parks partway — permanently, at rest. That is what left
+panels at opacity 0.4987 and section rules frozen half-drawn.
+
+**Nothing that owns a background animates its own opacity.** Fading such an element makes
+its ground translucent and whatever sits behind — here, a 1px hairline grid — shows
+through, so identical sibling panels render in different colours.
+
+**No transform accumulates.** Every rotation in `world.js` is a pure function of
+`(scroll, time)` and is assigned, never `+=`. An unbounded `rotation.z += spin` walked a
+product screenshot onto its side in about two minutes and upside down in five, so any tab
+left open eventually showed the product broken. `tools/check-scene.mjs` greps for this.
+
+**Every layer sits beside the camera's path, not on it.** Flying the camera *through* a
+layer fills the whole frame with it regardless of how small the pieces are — that is what
+smeared the data slabs across the Approach, Stack and Contact copy, and what parked a
+screenshot behind the word "schema" in the lede. Fog starts beyond the nearest layer so
+real product screenshots are never washed to ghosts.
 
 **The scene never holds content.** Every word, number and link lives in the DOM. `world.js`
 renders geometry and textures only. This is what makes the fallback a complete page rather
