@@ -128,11 +128,43 @@ through, so identical sibling panels render in different colours.
 product screenshot onto its side in about two minutes and upside down in five, so any tab
 left open eventually showed the product broken. `tools/check-scene.mjs` greps for this.
 
-**Every layer sits beside the camera's path, not on it.** Flying the camera *through* a
-layer fills the whole frame with it regardless of how small the pieces are — that is what
-smeared the data slabs across the Approach, Stack and Contact copy, and what parked a
-screenshot behind the word "schema" in the lede. Fog starts beyond the nearest layer so
-real product screenshots are never washed to ghosts.
+**The canvas paints only inside `.stage` rectangles.** It is full-viewport and fixed, but
+every frame it scissors to the boxes CSS laid out for it, so the 3D is a *cell of the page
+grid* rather than a backdrop behind everything. Text and geometry cannot share a pixel —
+geometrically, not by tuning.
+
+That one decision replaced four separate mitigations, all now deleted: fog, the
+88%-opaque section panels with `backdrop-filter`, the radial hero scrim, and a rule that
+kept every object beyond `x > 34`. Each existed to protect copy from a canvas sitting
+behind the whole page. `tools/check-scene.mjs` asserts it as a number: hide the canvas,
+shoot the same frame, and **zero differing pixels may fall outside a stage rect** — with a
+positive control first, because a diff of two identical pictures of a static page would
+otherwise pass.
+
+**The stage ground is a `z-index: -2` pseudo-element, never a background on the section.**
+Paint order is html paper → stage ground (-2) → canvas (-1) → text in normal flow. Put the
+background on `.hero` itself and it paints in the in-flow block-background phase, over the
+canvas, and the scene renders perfectly into a rectangle nobody can see. `body` is
+transparent for the same reason: an opaque body background covers the whole document.
+
+**`.has-world` may touch nothing but `#world`.** Asserted. The canvas is fixed and out of
+flow, so its arrival cannot move anything, and the page must look identical either way.
+
+**The camera is 32°, not 52°.** Fifty-two splays the edge of every box and is the loudest
+"WebGL demo" tell there is; thirty-two is a short telephoto, which is what makes a render
+read as product photography.
+
+**The material is a matcap, and that was measured, not assumed.** A bake-off rendered the
+same object under a procedural PMREM environment, a generated equirect, a hybrid with a
+grain roughness map, and two generated matcaps. The procedural environment lost — five
+flat colour boxes reflect five soft blobs and read as dark plastic. A matcap encodes the
+whole shading response, grain included. It bakes into view space, which is correct here
+precisely because the *object* turns under a near-fixed camera.
+
+**Every count in the part is a real number, milled into it.** Fourteen perforations because
+there are fourteen Edge Functions; thirty-three because there are thirty-three Postgres
+tables. If those figures change in the work they change in `world.js`, or the part is
+lying about the thing it depicts.
 
 **The scene never holds content.** Every word, number and link lives in the DOM. `world.js`
 renders geometry and textures only. This is what makes the fallback a complete page rather

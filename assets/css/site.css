@@ -39,6 +39,16 @@
   --navy:    #06244A;
   --gold:    #BFA46B;
 
+  /* The dark stage. #0B0B0D is not a taste call — it is the ground the
+     graphite matcap was proven against, and its rim survives on that specific
+     value. Ratios measured against it, not estimated:
+     --on-stage 17.4:1 · --on-stage-2 8.0:1 · --stage-accent 7.7:1
+     `--accent` #1B44C8 is 1.9:1 here and cannot be used on the stage. */
+  --stage:        #0B0B0D;
+  --on-stage:     #F4F4F0;
+  --on-stage-2:   #A6A6B0;
+  --stage-accent: #7FA0FF;
+
   --sans: "Schibsted Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: "Azeret Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
@@ -46,7 +56,11 @@
   --gut: clamp(1.25rem, 4.5vw, 3rem);
   --rhythm: clamp(5rem, 12vh, 9rem);
 
-  --fs-display: clamp(2.75rem, 8vw, 5.75rem);
+  /* Sized against the hero's TYPE COLUMN, not the viewport. The headline is
+     two masked lines, and at 92px "I build every" needed ~560px in a ~500px
+     column — so it broke to three and left "myself." stranded on its own,
+     which defeats the per-line masks entirely. */
+  --fs-display: clamp(2.5rem, 5.4vw, 4.5rem);
   /* Must stay above the project titles at every viewport. It used to cap at
      34px against their 40px, so "Work" read as subordinate to "Hekta" and the
      whole page hierarchy inverted. */
@@ -83,7 +97,10 @@ body {
   font-size: var(--fs-body);
   line-height: 1.65;
   color: var(--ink);
-  background: var(--paper);
+  /* Transparent, not paper. An opaque body background covers the whole
+     document and would hide a canvas sitting at z-index -1 everywhere. The
+     paper ground comes from `html`, which paints below the canvas. */
+  background: transparent;
   font-synthesis-weight: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -168,8 +185,12 @@ code {
   position: sticky;
   inset-block-start: 0;
   z-index: 20;
-  background: color-mix(in srgb, var(--paper) 80%, transparent);
-  backdrop-filter: blur(16px) saturate(1.4);
+  /* Opaque, and no blur. A full-viewport backdrop filter costs more per frame
+     on a mid-range phone than the entire 3D scene does, and a translucent bar
+     over a ground that changes from paper to near-black mid-scroll is a seam
+     generator with a timing race attached. A solid toolbar is a convention
+     everyone already reads. */
+  background: var(--paper);
   border-block-end: 1px solid var(--line);
 }
 .hdr__in {
@@ -234,13 +255,66 @@ code {
 
 /* ------------------------------------------------------------------ hero */
 
-/* Positioned unconditionally, so `.has-world` never touches `position` on
-   anything. It only needs to be a containing block for the scrim below, and a
-   world-conditional position rule is exactly the shape of the bug that put a
-   black slab in the page corner. */
+/* The hero is a dark stage, not paper. Not a mood: Hekta's screens are iOS
+   light mode on #F2F2F7, three points off `--paper`, so on paper the product
+   is an invisible rectangle — and the graphite the material bake settled on
+   only exists against a near-black ground. The rest of the page stays paper;
+   the step between them is ~17:1, which reads as a deliberate edge. A 7% tint
+   step is what reads as a rendering error. */
 .hero {
   position: relative;
-  padding-block: clamp(4.5rem, 15vh, 9rem) clamp(3rem, 8vh, 5rem);
+  color: var(--on-stage);
+  min-block-size: 100svb;
+  display: grid;
+  align-items: center;
+  padding-block: clamp(3rem, 8vh, 5rem);
+}
+
+/* The dark ground is a pseudo-element at z-index -2, NOT a background on the
+   section. That ordering is the whole architecture: html paper at the bottom,
+   this ground above it, the canvas at -1 above that, and the text in normal
+   flow above everything. Put the background on `.hero` itself and it paints in
+   the in-flow block-background phase — over the canvas — and the scene renders
+   perfectly into a rectangle nobody can see. Which is exactly what happened.
+   `.hero` keeps `z-index: auto` so it does not create a stacking context and
+   trap this below itself. */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background: var(--stage);
+}
+
+.hero__in {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  align-items: center;
+  inline-size: 100%;
+}
+
+/* Everything inside the hero is re-pointed at the stage palette. The paper
+   tokens are all measured against #FBFBF9 and every one of them fails here —
+   `--accent` is 1.9:1 on this ground. */
+.hero .eyebrow,
+.hero .open__k { color: var(--on-stage-2); }
+.hero__h em { color: var(--stage-accent); }
+.hero__sub { color: var(--on-stage-2); }
+.hero .open { border-block-start-color: rgb(255 255 255 / .16); }
+.hero .open__l a {
+  color: var(--stage-accent);
+  border-block-end-color: color-mix(in srgb, var(--stage-accent) 40%, transparent);
+}
+.hero .open__l a:hover { border-block-end-color: var(--stage-accent); }
+.hero :focus-visible { outline-color: var(--stage-accent); }
+
+@media (max-width: 860px) {
+  /* Type first, then the part beneath it. The stage keeps a real box rather
+     than collapsing, so the page does not reflow when the scene loads and does
+     not look like something failed when it never does. */
+  .hero__in { grid-template-columns: 1fr; }
+  .hero { min-block-size: auto; padding-block: clamp(2.5rem, 7vh, 4rem); }
 }
 
 .hero__h {
@@ -775,20 +849,49 @@ code {
   pointer-events: none;
 }
 .has-world #world { display: block; }
-.has-world body { background: transparent; }
 
-/* Text over a moving scene needs its own ground or it becomes unreadable the
-   moment a bright instance drifts underneath. Sections keep a near-opaque
-   paper panel; the scene reads through the hero and between the bands. */
-.has-world .section,
-.has-world .ftr {
-  background: color-mix(in srgb, var(--paper) 88%, transparent);
-  backdrop-filter: blur(14px) saturate(1.2);
+/* NOTHING ELSE MAY REFERENCE `.has-world`. The canvas is fixed and out of
+   flow, so its appearance cannot move anything, and the page must look
+   identical whether the scene loaded or not.
+
+   Gone with the old architecture, and deliberately not replaced:
+     · the 88%-opaque `.section` panels with `backdrop-filter: blur(14px)`
+     · the `.proj--alt` tint
+     · the radial paper scrim under the hero
+   All three existed to protect text from a canvas that sat behind the whole
+   page. The canvas now paints only inside `.stage` rectangles, so there is
+   nothing to protect the text from. A full-viewport backdrop blur also cost
+   more per frame on a mid-range phone than the entire scene did. */
+
+/* ------------------------------------------------------------- the stage */
+
+/* The cell the 3D is allowed to paint in. world.js reads this element's
+   rect every frame and scissors the renderer to it, which is what makes
+   "text never fights geometry" a fact about the layout rather than a
+   tuning exercise. It is empty, `aria-hidden`, and it reserves its own
+   space — so the page does not move when the scene arrives, and looks
+   deliberate when it never does. */
+.stage {
+  min-block-size: min(62svb, 30rem);
+  align-self: stretch;
 }
-.has-world .proj--alt {
-  background: color-mix(in srgb, var(--paper-2) 90%, transparent);
+
+/* Both stage rules live here, together and in this order, on purpose. The
+   mobile override first sat up with the hero — earlier in the file — so the
+   base `min-block-size` won on source order, `aspect-ratio` sized the width
+   from a 480px height, and the box came out 600px wide inside a 390px
+   viewport: 250px of horizontal overflow, invisible because `html` clips. */
+@media (max-width: 860px) {
+  .stage {
+    min-block-size: 0;
+    /* Width-driven, never height-driven. `aspect-ratio` resolves from
+       whichever axis is constrained, and in a single-column grid that has to
+       be the width or the box escapes the column. */
+    inline-size: 100%;
+    block-size: auto;
+    aspect-ratio: 5 / 4;
+  }
 }
-.has-world .hero { background: none; }
 
 /* ---------------------------------------------------------------- gallery */
 
@@ -857,18 +960,9 @@ code {
   .ledger li { grid-template-columns: 1fr; gap: .2rem; }
 }
 
-/* A soft paper scrim under the reading column. The scene is deliberately kept
-   out of the centre, but a bright instance can still drift close enough to
-   fight the headline, and the headline has to win every time. */
-.has-world .hero::before {
-  content: "";
-  position: absolute;
-  inset: -6% -10%;
-  z-index: -1;
-  background: radial-gradient(
-    62% 58% at 32% 50%,
-    color-mix(in srgb, var(--paper) 94%, transparent) 0%,
-    color-mix(in srgb, var(--paper) 78%, transparent) 45%,
-    transparent 78%);
-  pointer-events: none;
-}
+/* The radial paper scrim that used to live here is gone. It was an admission
+   that the composition had never been authored — geometry drifted into the
+   reading column, so a gradient was painted over the top of it. It also
+   carried `inset: -6% -10%`, which put 10% of latent horizontal overflow on
+   every viewport, invisible only because `html` clips. Both problems end with
+   the scissor rectangles. */

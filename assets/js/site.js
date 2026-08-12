@@ -74,32 +74,24 @@
   const lose = gl.getExtension('WEBGL_lose_context');
   if (lose) lose.loseContext();
 
-  /* TEMPORARY, and it comes out with the next rebuild.
-     The scene is held to the right of the reading column, which works while the
-     column is the left half of a wide viewport. Below ~700px the column is the
-     FULL width, so there is no "right" to move to and the geometry lands on the
-     lede — cubes sitting on the word "schema". Half-visible geometry over body
-     copy is worse than no geometry, so narrow viewports skip it entirely and do
-     not pay the 183KB either.
-     The real fix is the scissor architecture: the canvas renders only into
-     rectangles taken from real DOM elements, so mobile gets the scene inside
-     its own laid-out cell and this whole class of overlap stops existing. */
-  if (window.matchMedia('(max-width: 700px)').matches) return;
-
-  /* Coarse pointer plus little memory is the profile that stutters. It still
-     gets the scene, just a cheaper one. */
-  const lowPower =
-    (navigator.deviceMemory && navigator.deviceMemory <= 4) ||
-    window.matchMedia('(max-width: 620px)').matches;
+  /* No narrow-viewport skip and no reduced tier. The scene now paints only
+     inside `.stage` rectangles, so a phone gets it inside its own laid-out
+     cell instead of across the lede — which is what the width check was
+     working around. Cost went down rather than up: the shaded region is a
+     rect, not the viewport. */
 
   /* `?v=` on the dynamic import too. /assets/* is served `immutable`, so
      without one an edited world.js would be served from cache forever to
      everyone who had already loaded the page. */
-  import('./world.js?v=2')
+  import('./world.js?v=6')
     .then(({ createWorld }) => {
-      const world = createWorld(canvas, { lowPower });
-      document.documentElement.classList.add('has-world');
-      window.addEventListener('pagehide', () => world.destroy(), { once: true });
+      const world = createWorld(canvas);
+      /* Announce only once the matcap has landed. The class makes the canvas
+         visible, and a visible canvas with no material is a grey rectangle. */
+      return world.ready.then(() => {
+        document.documentElement.classList.add('has-world');
+        window.addEventListener('pagehide', () => world.destroy(), { once: true });
+      });
     })
     .catch(() => {
       /* A failed import leaves the static page exactly as it was. */

@@ -1,21 +1,23 @@
-/* Asserts the things a DOM-only harness cannot see: that the 3D scene is
- * actually on, actually non-empty at every scroll depth, and that its motion
- * is bounded rather than accumulating.
+/* Asserts the things a DOM-only harness cannot see: that the scene is on, that
+ * it paints ONLY inside its stage rectangles, and that its workload stays
+ * inside budget.
  *
  * Run:  node tools/check-scene.mjs [baseUrl]
  * Exit: 0 pass · 1 assertion failed · 2 inconclusive (the run proved nothing)
  *
- * The 2 matters. The previous verification pass reported success while Chrome
- * had never launched, so "did not fail" and "passed" have to be different
- * exit codes.
+ * The 2 matters. A previous verification pass reported success while Chrome had
+ * never launched, so "did not fail" and "passed" have to be different codes.
  */
 
 import { launch } from './cdp.mjs';
+import { mkdirSync, readFileSync } from 'node:fs';
 
 const BASE = process.argv[2] || 'http://localhost:8145';
 const OUT = new URL('./.shots/', import.meta.url).pathname;
-const { mkdirSync } = await import('node:fs');
 mkdirSync(OUT, { recursive: true });
+
+const MAX_CALLS = 10;
+const MAX_TRIS = 30_000;
 
 let pass = 0, fail = 0;
 const ok = (cond, name, detail = '') => {
@@ -23,125 +25,121 @@ const ok = (cond, name, detail = '') => {
   console.log(`${cond ? 'OK  ' : 'FAIL'} ${name}${detail ? ' :: ' + detail : ''}`);
 };
 
-/* Reads the composited frame back through the page itself: screenshot to
-   base64, decode with createImageBitmap, histogram it in an OffscreenCanvas.
-   No PNG decoder and no image dependency on this side. */
-const STATS = (b64, label, region = null) => `
-  (async () => {
-    const bmp = await createImageBitmap(await (await fetch("data:image/png;base64,${b64}")).blob());
-    const c = new OffscreenCanvas(bmp.width, bmp.height);
-    const x = c.getContext('2d'); x.drawImage(bmp, 0, 0);
-    const r = ${region ? JSON.stringify(region) : 'null'};
-    const d = r ? x.getImageData(r.x, r.y, r.w, r.h).data
-                : x.getImageData(0, 0, bmp.width, bmp.height).data;
-    const hist = new Map(); const n = d.length / 4;
-    for (let i = 0; i < d.length; i += 4) {
-      const k = (d[i] >> 3) << 10 | (d[i+1] >> 3) << 5 | (d[i+2] >> 3);
-      hist.set(k, (hist.get(k) || 0) + 1);
-    }
-    return { label: "${label}", flat: Math.max(...hist.values()) / n, bins: hist.size };
-  })()`;
-
-/* The reading column, in the 1280x800 frame. Text lives here; geometry must
-   not. This is the assertion that replaces the radial paper scrim — a scrim
-   is an admission that the composition was never authored. */
-const COLUMN = { x: 100, y: 90, w: 560, h: 660 };
-
-/* Scroll positions where the reading column holds real product screenshots.
-   A canvas-on/canvas-off pixel diff would separate content from geometry here
-   without needing this list, but it only means anything once reading grounds
-   are opaque. In this build the section panels are deliberately translucent
-   over the scene, so that diff measures the design rather than a defect. It
-   belongs with the rebuild, not with this repair. */
-const IMAGERY = [0.25, 0.5];
-
-const DIFF = (aB64, bB64, r) => `
+/* Diffs two frames and reports how much differs, split by whether it falls
+   inside a stage rectangle or outside one. Outside is the whole assertion:
+   the scene must be invisible everywhere it was not given a box. */
+const DIFF = (a, b, rects) => `
   (async () => {
     const grab = async (s) => {
       const bmp = await createImageBitmap(await (await fetch("data:image/png;base64," + s)).blob());
       const c = new OffscreenCanvas(bmp.width, bmp.height);
       const x = c.getContext('2d'); x.drawImage(bmp, 0, 0);
-      return x.getImageData(${r.x}, ${r.y}, ${r.w}, ${r.h}).data;
+      return { d: x.getImageData(0, 0, bmp.width, bmp.height).data, w: bmp.width, h: bmp.height };
     };
-    const A = await grab("${aB64}"), B = await grab("${bB64}");
-    let diff = 0; const n = A.length / 4;
-    for (let i = 0; i < A.length; i += 4) {
-      /* 8/255 per channel of slack absorbs JPEG-ish compositing noise without
-         hiding a real wash, which shifts whole regions by far more. */
-      if (Math.abs(A[i]-B[i]) > 8 || Math.abs(A[i+1]-B[i+1]) > 8 || Math.abs(A[i+2]-B[i+2]) > 8) diff++;
+    const A = await grab("${a}"), B = await grab("${b}");
+    if (A.w !== B.w || A.h !== B.h) return { error: 'size mismatch' };
+    const rects = ${JSON.stringify(rects)};
+    const inRect = (x, y) => rects.some(r =>
+      x >= r.x - 1 && x <= r.x + r.width + 1 && y >= r.y - 1 && y <= r.y + r.height + 1);
+    let inside = 0, outside = 0, firstOut = null;
+    for (let y = 0; y < A.h; y++) {
+      for (let x = 0; x < A.w; x++) {
+        const i = (y * A.w + x) * 4;
+        if (Math.abs(A.d[i] - B.d[i]) <= 6 && Math.abs(A.d[i+1] - B.d[i+1]) <= 6
+            && Math.abs(A.d[i+2] - B.d[i+2]) <= 6) continue;
+        if (inRect(x, y)) inside++;
+        else { outside++; if (!firstOut) firstOut = x + ',' + y; }
+      }
     }
-    return { frac: diff / n, diff, n };
+    return { inside, outside, firstOut, total: A.w * A.h };
   })()`;
 
-const browser = await launch({ width: 1280, height: 800 });
+const browser = await launch({ width: 1280, height: 800, port: 9451 });
 try {
-  const p = await browser.page(`${BASE}/index.html`);
-  await p.settle(1200);
+  const p = await browser.page(`${BASE}/index.html?verify=1`);
+  await p.settle(1800);
 
-  /* ---- inconclusive-run guards. These are not assertions; if any fails the
-         run proved nothing and must not be reported as a pass. ------------- */
-  const gl = await p.eval(`!!document.createElement('canvas').getContext('webgl2')`);
-  if (!gl) { console.error('INCONCLUSIVE: no webgl2 in this Chrome'); process.exit(2); }
-  const hasWorld = await p.eval(`document.documentElement.classList.contains('has-world')`);
-  if (!hasWorld) { console.error('INCONCLUSIVE: the scene never loaded'); process.exit(2); }
-  console.log('control: webgl2 present, has-world present');
+  /* ---- inconclusive guards: not assertions. If any of these fail the run
+         proved nothing and must not be reported as a pass. ----------------- */
+  if (!(await p.eval(`!!document.createElement('canvas').getContext('webgl2')`))) {
+    console.error('INCONCLUSIVE: no webgl2 in this Chrome (--enable-unsafe-swiftshader missing?)');
+    process.exit(2);
+  }
+  if (!(await p.eval(`document.documentElement.classList.contains('has-world')`))) {
+    console.error('INCONCLUSIVE: the scene never loaded');
+    process.exit(2);
+  }
+  if (!(await p.eval(`typeof window.__world === 'function'`))) {
+    console.error('INCONCLUSIVE: no verify hook — cannot read the workload');
+    process.exit(2);
+  }
+  console.log('control: webgl2 present, has-world present, verify hook present');
 
-  /* Smooth scrolling would make every scrollTo a race. */
   await p.eval(`document.documentElement.style.scrollBehavior='auto'`);
 
-  /* ---- 1. the frame is never empty, at any depth --------------------------
-     The build being replaced rendered pure (252,252,249) for the last ~10% of
-     the page because the camera flew past the last layer. `flat` is the share
-     of the frame taken by the single most common 5-bit colour. */
-  for (const pos of [0, 0.25, 0.5, 0.75, 0.9, 1.0]) {
-    await p.eval(`scrollTo(0, (document.documentElement.scrollHeight - innerHeight) * ${pos})`);
-    await p.settle(1100);
-    const file = `${OUT}p${String(pos).replace('.', '')}.png`;
-    await p.screenshot(file);
-    const b64 = (await import('node:fs')).readFileSync(file).toString('base64');
-    const s = await p.eval(STATS(b64, `p=${pos}`), { awaitPromise: true });
-    ok(s.flat <= 0.985, `frame not blank at p=${pos}`, `flat=${s.flat.toFixed(4)} bins=${s.bins}`);
-    ok(s.bins >= 24, `frame has colour variety at p=${pos}`, `bins=${s.bins}`);
+  for (const [w, h] of [[1280, 800], [390, 844], [768, 1024]]) {
+    await p.resize(w, h);
+    await p.settle(1200);
 
-    /* Inverted on purpose. A LOW flatness in the reading column means a wash
-       is sitting under the copy — a ghost screenshot behind the lede, or a
-       slab field smeared across a heading, both of which shipped.
+    const rects = await p.eval(`JSON.stringify([...document.querySelectorAll('.stage')]
+      .map(el => { const r = el.getBoundingClientRect();
+        return { x: Math.round(r.x), y: Math.round(r.y),
+                 width: Math.round(r.width), height: Math.round(r.height) }; }))`);
+    const stageRects = JSON.parse(rects);
+    ok(stageRects.length > 0, `a stage exists @${w}`, `${stageRects.length}`);
 
-       Not asserted where the column legitimately holds imagery: the Hekta
-       gallery is a row of real screenshots, and a photograph of a photograph
-       is not flat. Announced rather than skipped silently — a check that
-       quietly exempts half the page reads as full coverage when it is not. */
-    if (IMAGERY.includes(pos)) {
-      console.log(`SKIP reading-column flatness at p=${pos} (gallery imagery, not a wash)`);
-    } else {
-      const col = await p.eval(STATS(b64, `col p=${pos}`, COLUMN), { awaitPromise: true });
-      ok(col.flat >= 0.80, `reading column clear of geometry at p=${pos}`,
-         `flat=${col.flat.toFixed(4)}`);
-    }
+    const onFile = `${OUT}scene-${w}-on.png`;
+    const offFile = `${OUT}scene-${w}-off.png`;
+    await p.screenshot(onFile);
+    await p.eval(`document.getElementById('world').style.visibility='hidden'`);
+    await p.settle(320);
+    await p.screenshot(offFile);
+    await p.eval(`document.getElementById('world').style.visibility=''`);
+    await p.settle(320);
+
+    const on = readFileSync(onFile).toString('base64');
+    const off = readFileSync(offFile).toString('base64');
+    const d = await p.eval(DIFF(on, off, stageRects), { awaitPromise: true });
+
+    /* Positive control first. If hiding the canvas changes nothing anywhere,
+       the scene was never rendering and the assertion below would pass against
+       two identical pictures of a static page — the exact vacuous shape this
+       project already shipped once. */
+    ok(d.inside > 2000, `CONTROL the scene actually renders @${w}`,
+       `${d.inside}px differ inside the stage`);
+
+    /* The architecture, stated as a number. Anything the scene changes outside
+       a rectangle CSS gave it is geometry loose on the page. */
+    ok(d.outside === 0, `the scene paints ONLY inside its stage @${w}`,
+       `${d.outside}px outside${d.firstOut ? ', first at ' + d.firstOut : ''}`);
+
+    const info = await p.eval(`JSON.stringify(window.__world())`).then(JSON.parse);
+    ok(info.calls <= MAX_CALLS, `draw calls within budget @${w}`, `${info.calls} <= ${MAX_CALLS}`);
+    ok(info.tris <= MAX_TRIS, `triangles within budget @${w}`, `${info.tris} <= ${MAX_TRIS}`);
+    ok(info.matcap, `matcap loaded @${w}`);
   }
 
-  /* ---- 2. drift is bounded ------------------------------------------------
-     Every rotation is a pure function of time, so a long dwell cannot walk a
-     product screenshot onto its side the way `rotation.z += spin` did. There
-     is no scene handle to read, so assert the source shape instead — the
-     property the fix actually guarantees. */
-  const raw = await (await fetch(`${BASE}/assets/js/world.js?v=2`)).text();
-  /* Strip comments first. The file explains the bug it fixed by quoting the
-     old line, and a checker that cannot tell code from prose reports the
-     documentation as the defect. */
+  /* ---- source invariants ------------------------------------------------ */
+  const raw = await (await fetch(`${BASE}/assets/js/world.js?v=6`)).text();
+  /* Strip comments: the file documents the bugs it fixed by quoting them, and
+     a checker that cannot tell code from prose reports the documentation. */
   const src = raw.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
-  ok(!/(rotation|position|scale)\.[xyz]\s*[-+]=/.test(src), 'no accumulating transform in world.js');
-  ok(!/Math\.random/.test(src), 'no Math.random in world.js');
-  ok(/Math\.sin\(t \*/.test(src), 'motion is a function of time');
-
-  /* Canary: prove the accumulation detector can still fail. A grep that has
-     never matched is indistinguishable from a grep that cannot match. */
   const ACC = /(rotation|position|scale)\.[xyz]\s*[-+]=/;
-  ok(ACC.test('mesh.rotation.z += 0.01;'), 'CANARY accumulation detector fires on a known-bad line');
+  ok(!ACC.test(src), 'no accumulating transform in world.js');
+  ok(!/Math\.random/.test(src), 'no Math.random in world.js');
+  ok(!/new Fog|FogExp2/.test(src), 'no fog in world.js');
+  ok(ACC.test('mesh.rotation.z += 0.01;'),
+     'CANARY accumulation detector fires on a known-bad line');
 
-  /* ---- 3. the gate still refuses when it should --------------------------- */
-  ok(/getContext\('webgl2'\)\s*;/.test(await (await fetch(`${BASE}/assets/js/site.js?v=3`)).text()),
-     'gate probes webgl2 only (three r185 has no webgl1 path)');
+  /* Same comment-stripping discipline as the JS: this stylesheet explains the
+     rules it deleted by naming them, and a checker that reads prose as code
+     reports the documentation as the defect. */
+  const cssRaw = await (await fetch(`${BASE}/assets/css/site.css?v=10`)).text();
+  const css = cssRaw.replace(/\/\*[\s\S]*?\*\//g, '');
+  ok(!/backdrop-filter/.test(css), 'no backdrop-filter anywhere in the stylesheet');
+  const hasWorldRules = css.split('\n').filter((l) => l.includes('.has-world') && !l.includes('#world'));
+  ok(hasWorldRules.length === 0, '.has-world touches nothing but #world',
+     hasWorldRules.slice(0, 2).join(' | '));
 } finally {
   await browser.close();
 }

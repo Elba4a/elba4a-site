@@ -10,8 +10,8 @@
 <link rel="icon" href="/assets/img/icon-32.png?v=3" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/assets/img/icon-180.png?v=3">
 <link rel="preload" href="/assets/fonts/schibsted-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/css/site.css?v=5">
-<script src="/assets/js/site.js?v=4" defer></script>
+<link rel="stylesheet" href="/assets/css/site.css?v=10">
+<script src="/assets/js/site.js?v=8" defer></script>
 <meta property="og:type" content="website">
 <meta property="og:locale" content="en_US">
 <meta property="og:title" content="Islam Soliman — Software Engineer">
@@ -24,7 +24,7 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Islam Soliman — I build every layer.">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#FBFBF9">
+<meta name="theme-color" content="#0B0B0D">
 </head>
 <body>
 <!--
@@ -68,28 +68,36 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 
   <!-- ------------------------------------------------------------- hero -->
   <section class="hero">
-    <div class="shell">
-      <p class="eyebrow">Software engineer · Cairo · Remote</p>
+    <div class="shell hero__in">
+      <div class="hero__type">
+        <p class="eyebrow">Software engineer · Cairo · Remote</p>
 
-      <h1 class="hero__h">
-        <span class="line"><span>I build every</span></span>
-        <span class="line"><span>layer <em>myself</em>.</span></span>
-      </h1>
+        <h1 class="hero__h">
+          <span class="line"><span>I build every</span></span>
+          <span class="line"><span>layer <em>myself</em>.</span></span>
+        </h1>
 
-      <p class="hero__sub">
-        The app, the web front end, the schema, the functions that run on the edge, and the
-        container the whole thing ships in. Four products, no team.
-      </p>
+        <p class="hero__sub">
+          The app, the web front end, the schema, the functions that run on the edge, and the
+          container the whole thing ships in. Four products, no team.
+        </p>
 
-      <div class="open">
-        <span class="open__k">Open right now</span>
-        <ul class="open__l">
-          <li><a href="https://noor-eg.net" rel="noopener">noor-eg.net</a></li>
-          <li><a href="https://github.com/Elba4a/karat-gold" rel="noopener">karat-gold</a></li>
-          <li><a href="https://github.com/Elba4a/arabic-type-rn" rel="noopener">arabic-type-rn</a></li>
-          <li><a href="https://github.com/Elba4a/elba4a-site" rel="noopener">this page's source</a></li>
-        </ul>
+        <div class="open">
+          <span class="open__k">Open right now</span>
+          <ul class="open__l">
+            <li><a href="https://noor-eg.net" rel="noopener">noor-eg.net</a></li>
+            <li><a href="https://github.com/Elba4a/karat-gold" rel="noopener">karat-gold</a></li>
+            <li><a href="https://github.com/Elba4a/arabic-type-rn" rel="noopener">arabic-type-rn</a></li>
+            <li><a href="https://github.com/Elba4a/elba4a-site" rel="noopener">this page's source</a></li>
+          </ul>
+        </div>
       </div>
+
+      <!-- The cell the 3D is allowed to paint in. CSS lays it out; world.js
+           reads its rect every frame and scissors to it, so geometry cannot
+           reach the type beside it. Empty and aria-hidden: the scene never
+           holds content. -->
+      <div class="stage" aria-hidden="true"></div>
     </div>
   </section>
 
